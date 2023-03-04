@@ -19,12 +19,13 @@ from typing import Optional, Any
 import plotly
 import tkinter as tk
 
+########################################################################
 
 def load_person(person_string: str) -> Person:
   """Returns a Person from the defined string of characteristics.
   """
   
-  ...
+  # TODO
   
   return person
 
@@ -47,10 +48,11 @@ def load_persons(file_name: tuple[str | bool]) -> list[Person]:
       persons_so_far.append(person)
   
   return persons_so_far
-      
-      
-  
 
+
+########################################################################
+  
+# TODO: Finish attributes, initializer, determine functions necessary
 class Person:
   """The main class to represent each person in the game of GuessWho.
   
@@ -62,7 +64,7 @@ class Person:
   - facial_attribute: The person's facial attribute. None if none.
   - facial_hair: The person's facial_hair. None if none.
   - accessory: The person's accesory. None if none.
-  -
+  - 
   - guessed: Boolean whether the person has been guessed or not.
   
   Representation Invariants:
@@ -72,6 +74,7 @@ class Person:
   
   """
 
+# TODO: Attributes, initializer, determine functions necessary
 class GuessWho:
   """The main class to run the game of GuessWho and represent its game_state.
   

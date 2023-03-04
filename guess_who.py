@@ -10,8 +10,11 @@ All characters:
 https://www.joe.co.uk/life/ranking-guess-who-least-most-horny-193991
 """
 
+import csv
 import random
 import copy
+
+from typing import Optional, Any
 
 import plotly
 import tkinter as tk

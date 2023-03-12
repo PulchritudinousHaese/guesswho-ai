@@ -59,7 +59,7 @@ class Person:
   Instance Attributes:
   - name: The person's name (for the final guess)
   - ear_size: The size of the person's ears.
-  - hair_style: The person's hairstyle. 
+  - hair_style: The person's hairstyle. None if none.
   - hair_length: The person's hair length.
   - hair_colour: The person's hair colour. None if none.
   - nose_size: The person's nose size.

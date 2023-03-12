@@ -70,7 +70,7 @@ class Person:
   Representation Invariants:
   - 
   
-  >>> p = Person(jhjhhhffhgg
+  >>> p = Person(
   
   """
 

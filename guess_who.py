@@ -60,6 +60,7 @@ class Person:
   - name: The person's name (for the final guess)
   - ear_size: The size of the person's ears.
   - hair_style: The person's hairstyle. 
+  - hair_length: The person's hair length.
   - hair_colour: The person's hair colour. None if none.
   - facial_attribute: The person's facial attribute. None if none.
   - facial_hair: The person's facial_hair. None if none.

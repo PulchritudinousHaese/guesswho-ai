@@ -3,11 +3,10 @@ This file is Copyright (c) 2023 Annie Wang, Mikhail Skazhenyuk, Xinyuan Gu, Xime
 import random
 from typing import Optional
 
-import a2_game_tree
-import a2_adversarial_wordle as aw
+import guess_who
+#import a2_adversarial_wordle as aw
 
-
-class ExploringGuesser(aw.Guesser):
+class WinningAI(aw.Guesser):
     """A Guesser player that sometimes plays greedily and sometimes plays randomly.
 
     See assignment handout for details.
@@ -71,10 +70,11 @@ class ExploringGuesser(aw.Guesser):
         probabilities = {x.guesser_win_probability for x in self._game_tree.get_subtrees()}
         return max(probabilities)
 
+class LosingAI(aw.Guesser):
 
 def run_learning_algorithm(
-        word_set_file: str,
-        max_guesses: int,
+        characters_file: str, 
+        questions_file: str,
         exploration_probabilities: list[float],
         show_stats: bool = True) -> a2_game_tree.GameTree:
     """Play a sequence of AdversarialWordle games using an ExploringGuesser and RandomAdversary.

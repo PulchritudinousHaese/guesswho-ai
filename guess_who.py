@@ -58,13 +58,13 @@ class Person:
   
   Instance Attributes:
   - name: The person's name (for the final guess)
-  - sex: Whether the person is male or female.
+  - ear_size: The size of the person's ears.
   - hair_style: The person's hairstyle. 
   - hair_colour: The person's hair colour. None if none.
   - facial_attribute: The person's facial attribute. None if none.
   - facial_hair: The person's facial_hair. None if none.
   - accessory: The person's accesory. None if none.
-  - 
+  - mouth_size: The person's mouth size.
   - guessed: Boolean whether the person has been guessed or not.
   
   Representation Invariants:

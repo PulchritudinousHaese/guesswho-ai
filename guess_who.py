@@ -81,11 +81,11 @@ class GuessWho:
   
   Instance Attributes:
   - guesses: A list representing the moves made by both players in order.
-  - player_one_guesses: A list representing the guesses done by player one.
-  - player_two_guesses: A list representing the guesses done by player two.
-  - 
+  # - player_one_guesses: A list representing the guesses done by player one.
+  # - player_two_guesses: A list representing the guesses done by player two.
+  - spies: A list representing the spies of each player (index 0 for player one, index 1 for player two)
   
   Representation Invariants:
-  - (player_one_guesses and guesses) or not (player_one_guesses or guesses)
-  - (player_two_guesses and guesses) or not (player_two_guesses or guesses)
+  # - (player_one_guesses and guesses) or not (player_one_guesses or guesses)
+  # - (player_two_guesses and guesses) or not (player_two_guesses or guesses)
   """

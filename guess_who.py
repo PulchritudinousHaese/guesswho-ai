@@ -66,7 +66,7 @@ class Person:
   - facial_hair: The person's facial_hair. None if none.
   - accessory: The person's accesory. None if none.
   - mouth_size: The person's mouth size.
-  - guessed: Boolean whether the person has been guessed or not.
+  - up: Boolean whether the person has been guessed/eliminated or not.
   
   Representation Invariants:
   - 

@@ -69,11 +69,46 @@ class Person:
   - up: Boolean whether the person has been guessed/eliminated or not.
   
   Representation Invariants:
-  - 
+  - len(self.name) != ''
+  - len(self.ear_size) != ''
+  - len(self.hair_style != '' or self.hair_style is None
+  - len(self.hair_length) != '' or self.hair_length is None
+  - len(self.hair_colour) != '' or self.hair_colour is None
+  - len(nose_size) != ''
+  - len(self.facial_hair) != '' or self.facial_hair is None
+  - len(self.accessory) != '' or self.accessory is None
+  - len(mouth_size) != ''
+  - self.up is True or self.up is False
   
   >>> p = Person(
-  
   """
+  name: str
+  ear_size: str
+  hair_style: Optional[str]
+  hair_length: Optional[str]
+  hair_colour: Optional[str]
+  nose_size: str
+  facial_hair: Optional[str]
+  accessory: Optional[str]
+  mouth_size: str
+  up: bool
+  
+  def __init__(self, name:str, ear_size: str, hair_style: Optional[str],
+             hair_length: Optional[str], hair_colour: Optional[str],
+             nose_size: str, facial_hair: Optional[str], accessory: Optional[str],
+             mouth_size: str, up: bool = True) -> None:
+    """Initialize Person with given Instance Attributes. """
+
+    self.name = name
+    self.ear_size = ear_size
+    self.hair_style = hair_style
+    self.hair_length = hair_length
+    self.hair_colour = hair_colour
+    self.nose_size = nose_size
+    self.facial_hair = facial_hair
+    self.accessory = accessory
+    self.mouth_size = mouth_size
+    self.up = up
 
 # TODO: Attributes, initializer, determine functions necessary
 class GuessWho:

@@ -69,15 +69,15 @@ class Person:
   - up: Boolean whether the person has been guessed/eliminated or not.
   
   Representation Invariants:
-  - len(self.name) != ''
-  - len(self.ear_size) != ''
-  - len(self.hair_style != '' or self.hair_style is None
-  - len(self.hair_length) != '' or self.hair_length is None
-  - len(self.hair_colour) != '' or self.hair_colour is None
-  - len(nose_size) != ''
-  - len(self.facial_hair) != '' or self.facial_hair is None
-  - len(self.accessory) != '' or self.accessory is None
-  - len(mouth_size) != ''
+  - self.name != ''
+  - self.ear_size != ''
+  - self.hair_style != '' or self.hair_style is None
+  - self.hair_length != '' or self.hair_length is None
+  - self.hair_colour != '' or self.hair_colour is None
+  - nose_size != ''
+  - self.facial_hair != '' or self.facial_hair is None
+  - self.accessory != '' or self.accessory is None
+  - mouth_size != ''
   - self.up is True or self.up is False
   
   >>> p = Person(

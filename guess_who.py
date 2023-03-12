@@ -74,10 +74,10 @@ class Person:
   - self.hair_style != '' or self.hair_style is None
   - self.hair_length != '' or self.hair_length is None
   - self.hair_colour != '' or self.hair_colour is None
-  - nose_size != ''
+  - self.nose_size != ''
   - self.facial_hair != '' or self.facial_hair is None
   - self.accessory != '' or self.accessory is None
-  - mouth_size != ''
+  - self.mouth_size != ''
   - self.up is True or self.up is False
   
   >>> p = Person(

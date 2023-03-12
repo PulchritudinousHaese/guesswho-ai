@@ -77,15 +77,48 @@ class Person:
 
 # TODO: Attributes, initializer, determine functions necessary
 class GuessWho:
-  """The main class to run the game of GuessWho and represent its game_state.
-  
-  Instance Attributes:
-  - guesses: A list representing the moves made by both players in order.
-  # - player_one_guesses: A list representing the guesses done by player one.
-  # - player_two_guesses: A list representing the guesses done by player two.
-  - spies: A list representing the spies of each player (index 0 for player one, index 1 for player two)
-  
-  Representation Invariants:
-  # - (player_one_guesses and guesses) or not (player_one_guesses or guesses)
-  # - (player_two_guesses and guesses) or not (player_two_guesses or guesses)
-  """
+    """The main class to run the game of GuessWho and represent its game_state.
+
+    Instance Attributes:
+    - guesses: A list representing the moves made by both players in order.
+    - spies: A list representing the spies of each player (index 0 for player one, index 1 for player two)
+    - players: A list of the players in the game
+
+
+    Representation Invariants:
+    - len(spies) == 2
+    - spy is a valid person from the given file
+     """
+    guesses: list[str]
+    spies: list[Person]
+
+    def __init__(self, spy1: Person, spy2: Person) -> None:
+        """ Initialize a GuessWho game with the two players"""
+        self.guesses = []
+        self.spies = [spy1, spy2]
+
+
+class Player:
+    """ One of the player in the game
+
+    Instance Attributes:
+    - questions : A list representing the questions the player has asked.
+    - n : an integer determining if the player is the player 0 or player 1 in the game.
+    - spy : The spy this player has chosen.
+
+    Representation Invariants:
+        - n == 1 or n == 2
+        - spy is a valid person from the given file
+    """
+
+    questions: list[str]
+    n: int
+    spy: Person
+
+    def __init__(self, n, spy) -> None:
+        """ create a new player for the game. n represets if this is the first/second player and spy
+        represents the chraracter this player has chosen.
+         """
+        self.question = []
+        self.n = n
+        self.spy = spy

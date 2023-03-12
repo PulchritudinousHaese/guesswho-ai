@@ -19,6 +19,8 @@ from typing import Optional, Any
 import plotly
 import tkinter as tk
 
+from features import *
+
 ########################################################################
 
 def load_person(person_string: str) -> Person:

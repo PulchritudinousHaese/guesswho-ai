@@ -133,6 +133,25 @@ class GuessWho:
         """ Initialize a GuessWho game with the two players"""
         self.guesses = []
         self.spies = [spy1, spy2]
+        
+    def random_spies(): 
+        
+   
+    def _update_possible_answers(self) -> None:
+        """Record the given status returned by the Adversary player.
+
+        Preconditions:
+        - not self.is_guesser_turn()
+        - len(status) == self.word_size
+        - _is_valid_status(status)
+        """
+        self.statuses.append(status)
+
+        # Update self._possible_answers
+        self._possible_answers = _find_correct_answers(self._possible_answers, self.guesses, self.statuses)
+    
+    def eliminate_characteristics():
+    
 
 
 class Player:

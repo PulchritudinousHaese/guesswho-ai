@@ -6,7 +6,7 @@ from typing import Optional
 import guess_who
 #import a2_adversarial_wordle as aw
 
-class WinningAI(aw.Guesser):
+class ExplorinGuesser(aw.Guesser):
     """A Guesser player that sometimes plays greedily and sometimes plays randomly.
 
     See assignment handout for details.
@@ -69,8 +69,6 @@ class WinningAI(aw.Guesser):
         """Returns the min of probabilities in the current subtrees"""
         probabilities = {x.guesser_win_probability for x in self._game_tree.get_subtrees()}
         return max(probabilities)
-
-class LosingAI(aw.Guesser):
 
 def run_learning_algorithm(
         characters_file: str, 

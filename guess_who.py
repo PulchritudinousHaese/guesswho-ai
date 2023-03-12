@@ -135,7 +135,10 @@ class GuessWho:
         self.spies = [spy1, spy2]
         
     def random_spies(): 
-        
+        """Pick 2 random characters as spies"""
+        spy1 = load_persons.choice()
+        spy2 = load_persons.choice()
+        self.spies = [spy1, spy2]
    
     def _update_possible_answers(self) -> None:
         """Record the given status returned by the Adversary player.

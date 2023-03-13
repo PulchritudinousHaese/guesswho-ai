@@ -1,14 +1,12 @@
 """CSC111 Winter 2023 Project: Guess Who Artifical Intelligence
-
 This module contains the classes and necessary functions to execute
 the backend of the classic game "Guess Who".
-
 Some features:
 https://chalkdustmagazine.com/blog/cracking-guess-board-game/
-
 All characters:
 https://www.joe.co.uk/life/ranking-guess-who-least-most-horny-193991
 """
+from __future__ import annotations
 
 import csv
 import random
@@ -21,35 +19,38 @@ import tkinter as tk
 
 from features import *
 
+
 ########################################################################
 
-def load_person(person_string: str) -> Person:
-  """Returns a Person from the defined string of characteristics.
-  """
-  
-  # TODO
-  
-  return person
+def load_person(person_tuple: tuple[str]) -> Person:
+    """Returns a Person from the defined string of characteristics.
+
+    Preconditions:
+    - len(person_tuple) == 9
+    """
+    p = person_tuple
+    person = Person(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8])
+    return person
 
 
-def load_persons(file_name: tuple[str | bool]) -> list[Person]:
-  """Function to load all features into a list of Person classes 
-  as determined in the file file_name.
-  
-  Precondition:
-  - file_name != ''
-  """
-  persons_so_far = []
-  
-  with open(games_file) as csv_file:
-    reader = csv.reader(csv_file)
-    
-    for row in reader:
-      row = tuple(row)
-      person = load_person(row)
-      persons_so_far.append(person)
-  
-  return persons_so_far
+def load_persons(file_name: str) -> list[Person]:
+    """Function to load all features into a list of Person classes
+    as determined in the file file_name.
+
+    Precondition:
+    - file_name != ''
+    """
+    persons_so_far = []
+
+    with open(file_name) as csv_file:
+        reader = csv.reader(csv_file)
+
+        for row in reader:
+            row = tuple(row)
+            person = load_person(row)
+            persons_so_far.append(person)
+
+    return persons_so_far
 
 
 ########################################################################

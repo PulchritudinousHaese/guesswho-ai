@@ -1,48 +1,49 @@
 """CSC111 Winter 2023 Project: Guess Who Artifical Intelligence
-This module contains the GameTree class and all necessary methods to 
-add respective player moves and change probabilities. 
+This module contains the GameTree class and all necessary methods to
+add respective player moves and change probabilities.
 """
+from __future__ import annotations
 
 from typing import Optional
-from __future__ import annotations
 
 STARTING_MOVE = '*'
 
+
 class GameTree:
     """A tree to compile different move sequences of the game Guess Who.
-    
+
     THIS DOES NOT STORE ALTERNATING MOVES, RATHER IT STORES INDIVIDUAL PLAYER MOVE SEQUENCES.
 
     Each node in the tree stores a Guess Who question/guess.
 
     Instance Attributes:
         - move: '*' if it is the start of the game, or a question/guess
-        - win_probability: the probability the player will win if they select this path.
+        - win_probability: the probability the player will win if they follow this path.
 
     Representation Invariants:
-        - self.move == GAME_START_MOVE or self.move is a valid Guess Who move
+        - self.move == STARTING_MOVE or self.move is a valid Guess Who question/guess
         - all(key == self._subtrees[key].move for key in self._subtrees)
-        - GAME_START_MOVE not in self._subtrees  # since it can only appear at the very top of a game tree
+        - STARTING_MOVE not in self._subtrees  # since it can only appear at the very top of a game tree
     """
     move: str
-    guesser_win_probability: Optional[float] = 0.0
+    win_probability: Optional[float] = 0.0
 
     # Private Instance Attributes:
     #  - _subtrees:
-    #      Another game tree that contains a path the game could follow.
-    _subtrees: dict[str | tuple[str, ...], GameTree]
+    #      Following step along the path (question/guess)
+    _subtrees: dict[str, GameTree]
 
-    def __init__(self, move: str | tuple[str, ...] = GAME_START_MOVE,
-                 guesser_win_probability: Optional[float] = 0.0) -> None:
+    def __init__(self, move: str = STARTING_MOVE,
+                 win_probability: Optional[float] = 0.0) -> None:
         """Initialize a new game tree.
 
         >>> game = GameTree()
-        >>> game.move == GAME_START_MOVE
+        >>> game.move == STARTING_MOVE
         True
         """
         self.move = move
         self._subtrees = {}
-        self.guesser_win_probability = guesser_win_probability
+        self.win_probability = win_probability
 
     def get_subtrees(self) -> list[GameTree]:
         """Return the game trees (out of the _subtrees dict)."""
@@ -73,10 +74,10 @@ class GameTree:
         Preconditions:
             - depth >= 0
         """
-        move_desc = f'{self.move} -> {turn_desc}\n'
+        move_desc = f'{self.move}\n'
         str_so_far = '  ' * depth + move_desc
         for subtree in self._subtrees.values():
-            str_so_far += subtree._str_indented(depth + 1)
+            str_so_far += subtree._printable(depth + 1)
         return str_so_far
 
     def add_subtree(self, subtree: GameTree) -> None:
@@ -87,7 +88,7 @@ class GameTree:
         self._update_win_probability()
 
     def insert_move_sequence(self, moves: list[str], probability: Optional[float] = 0.0) -> None:
-        """Insert the given sequence of moves (questions) into this tree.
+        """Insert the given sequence of moves (questions/guesses) into this tree.
         """
         moves_copy = moves.copy()
         if self.sequence_in_tree(moves) or not moves:
@@ -119,7 +120,7 @@ class GameTree:
         """
         if len(moves) == 1:  # Last move in sequence
             new_leaf = GameTree(moves[0])
-            new_leaf.guesser_win_probability = probability
+            new_leaf.win_probability = probability
             self.add_subtree(new_leaf)
         else:
             moves_copy = moves.copy()
@@ -127,32 +128,29 @@ class GameTree:
             game_tree = GameTree(move)
             game_tree.next_moves(moves_copy, probability)
             self.add_subtree(game_tree)
-        self._update_guesser_win_probability()
+        self._update_win_probability()
 
     def _update_win_probability(self) -> None:
         """Recalculate the guesser win probability of this tree.
 
         Probability is updated based on these metrics:
-        - 
+        -
         """
         if not self.get_subtrees():
             return
-        elif self.get_subtrees() and self.is_guesser_turn():
-            self.guesser_win_probability = max({tree.guesser_win_probability for tree in self.get_subtrees()})
         elif self.get_subtrees():
-            probability_sum = sum(tree.guesser_win_probability for tree in self.get_subtrees())
-            self.guesser_win_probability = probability_sum / len(self.get_subtrees())
+            probability_sum = sum(tree.win_probability for tree in self.get_subtrees())
+            self.win_probability = probability_sum / len(self.get_subtrees())
 
     def update_tree_probabilities(self) -> None:
         """Updates the entire tree's probabilities recursively."""
         if self._subtrees:
             for subtree in self.get_subtrees():
                 subtree.update_tree_probabilities()
-            self._update_guesser_win_probability()
+            self._update_win_probability()
 
 
 if __name__ == '__main__':
     import doctest
 
     doctest.testmod(verbose=True)
-

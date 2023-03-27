@@ -5,6 +5,8 @@ Some features:
 https://chalkdustmagazine.com/blog/cracking-guess-board-game/
 All characters:
 https://www.joe.co.uk/life/ranking-guess-who-least-most-horny-193991
+
+This file is Copyright (c) 2023 Annie Wang, Mikhail Skazhenyuk, Xinyuan Gu, Ximei Lin.
 """
 from __future__ import annotations
 

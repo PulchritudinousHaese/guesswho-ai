@@ -151,12 +151,12 @@ class GuessWho:
         elif guess2 == self.players[2].spy:
             return 'player2'
 
-    def _whose_turn(self) -> str:
+    def _whose_turn(self) -> int:
         """ return it's which player's turn to make a guess in this round of game"""
         if len(self.guesses) % 2 == 0:
-            return 'player2'
+            return 2
         else:
-            return 'player1'
+            return 1
 
 
 class Player:
@@ -187,9 +187,12 @@ class Player:
         self.n = n
         self.spy = spy
 
-    def _make_guesses(self) -> str:
-        """ The player makes a guess of the spy that the opponent has choses. An abstract class that would be
+    def _make_guesses(self, game: GuessWho) -> str:
+        """ The player makes a guess of the opponent's spy based on the current state of the game. An abstract class that would be
         implemented differently based on different players we define.
+        
+         Preconditions: 
+         - game._whose_turn() == self.n        
         """
         raise NotImplementedError
     

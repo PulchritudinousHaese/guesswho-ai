@@ -182,7 +182,7 @@ class Player:
     questions: list[str]
     n: int
     spy: Person
-    possible_guesses: set[Person]
+    possible_guesses: list[Person]
     visited: set[Person] = set()
     _game_tree: GameTree
 

@@ -47,7 +47,7 @@ def load_persons(file_name: str) -> list[Person]:
 
     with open(file_name) as csv_file:
         reader = csv.reader(csv_file)
-
+        next(reader)
         for row in reader:
             row = tuple(row)
             person = load_person(row)

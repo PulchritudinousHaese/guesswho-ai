@@ -16,6 +16,7 @@ from typing import Optional, Any
 
 import plotly
 import tkinter as tk
+from game_tree import GameTree
 
 from features import *
 
@@ -134,12 +135,8 @@ class GuessWho:
         """ Initialize a GuessWho game with the two players"""
         self.guesses = []
         self.spies = [spy1, spy2]
-        
-    def random_spies(): 
-        """Pick 2 random characters as spies"""
-        spy1 = load_persons.choice()
-        spy2 = load_persons.choice()
-        self.spies = [spy1, spy2]
+         players = dict[int, Player]
+    
    
     def _update_possible_answers(self) -> None:
         """Record the given status returned by the Adversary player.
@@ -153,8 +150,24 @@ class GuessWho:
 
         # Update self._possible_answers
         self._possible_answers = _find_correct_answers(self._possible_answers, self.guesses, self.statuses)
+         def _record_answers(self, guess: str) -> None:
+        """ Record the guesses that have been made by each player in the game, and update the game's status"""
+        self.guesses.append(guess)
+
+    def get_winner(self, guess1, guess2) -> Optional[str]:
+        """ return if there is a winner in the game and which player is the winner, with the guess1 by player1
+        and guess2 by player2"""
+        if guess1 == self.p
+
+
+    def _whose_turn(self) -> str:
+        """ return it's which player's turn to make a guess in this round of game"""
+        if len(self.guesses) % 2 == 0:
+            return 'player 2'
+        else:
+            return 'player 1'
     
-    def eliminate_characteristics():
+    
     
 
 
@@ -176,6 +189,7 @@ class Player:
     spy: Person
     possible_guesses: set[Person]
     visited: set[Person] = set()
+    _game_tree : GameTree
 
     def __init__(self, n, spy) -> None:
         """ create a new player for the game. n represets if this is the first/second player and spy
@@ -184,6 +198,13 @@ class Player:
         self.question = []
         self.n = n
         self.spy = spy
+       
+    def _make_guesses(self) -> str:
+        """ The player makes a guess of the spy that the opponent has choses. An abstract class that would be
+        implemented differently based on different players we define.
+        """
+        raise NotImplementedError
+
         
    def check_question_to_person:
     for ---

@@ -174,6 +174,8 @@ class Player:
     questions: list[str]
     n: int
     spy: Person
+    possible_guesses: set[Person]
+    visited: set[Person] = set()
 
     def __init__(self, n, spy) -> None:
         """ create a new player for the game. n represets if this is the first/second player and spy
@@ -182,3 +184,8 @@ class Player:
         self.question = []
         self.n = n
         self.spy = spy
+        
+   def check_question_to_person:
+    for ---
+    if 
+    

@@ -55,11 +55,11 @@ def load_persons(file_name: str) -> list[Person]:
 
 
 ########################################################################
-  
+
 # TODO: Finish attributes, initializer, determine functions necessary
 class Person:
   """The main class to represent each person in the game of GuessWho.
-  
+
   Instance Attributes:
   - name: The person's name (for the final guess)
   - ear_size: The size of the person's ears.
@@ -71,7 +71,7 @@ class Person:
   - accessory: The person's accesory. None if none.
   - mouth_size: The person's mouth size.
   - up: Boolean whether the person has been guessed/eliminated or not.
-  
+
   Representation Invariants:
   - self.name != ''
   - self.ear_size != ''
@@ -83,7 +83,7 @@ class Person:
   - self.accessory != '' or self.accessory is None
   - self.mouth_size != ''
   - self.up is True or self.up is False
-  
+
   >>> p = Person(
   """
   name: str
@@ -96,7 +96,7 @@ class Person:
   accessory: Optional[str]
   mouth_size: str
   up: bool
-  
+
   def __init__(self, name:str, ear_size: str, hair_style: Optional[str],
              hair_length: Optional[str], hair_colour: Optional[str],
              nose_size: str, facial_hair: Optional[str], accessory: Optional[str],
@@ -129,46 +129,34 @@ class GuessWho:
     - spy is a valid person from the given file
      """
     guesses: list[str]
-    spies: list[Person]
+    players: dict[int, Player]
+    characters = list[Person]
 
-    def __init__(self, spy1: Person, spy2: Person) -> None:
+    def __init__(self, player1, player2, characters: list[Person]) -> None:
         """ Initialize a GuessWho game with the two players"""
         self.guesses = []
-        self.spies = [spy1, spy2]
-         players = dict[int, Player]
-    
-   
-    def _update_possible_answers(self) -> None:
-        """Record the given status returned by the Adversary player.
+        self.players[1] = player1
+        self.players[2] = player2
+        self.characters = characters
 
-        Preconditions:
-        - not self.is_guesser_turn()
-        - len(status) == self.word_size
-        - _is_valid_status(status)
-        """
-        self.statuses.append(status)
-
-        # Update self._possible_answers
-        self._possible_answers = _find_correct_answers(self._possible_answers, self.guesses, self.statuses)
-         def _record_answers(self, guess: str) -> None:
+    def _record_answers(self, guess: str) -> None:
         """ Record the guesses that have been made by each player in the game, and update the game's status"""
         self.guesses.append(guess)
 
     def get_winner(self, guess1, guess2) -> Optional[str]:
         """ return if there is a winner in the game and which player is the winner, with the guess1 by player1
         and guess2 by player2"""
-        if guess1 == self.p
-
+        if guess1 == self.players[1].spy:
+            return 'player1'
+        elif guess2 == self.players[2].spy:
+            return 'player2'
 
     def _whose_turn(self) -> str:
         """ return it's which player's turn to make a guess in this round of game"""
         if len(self.guesses) % 2 == 0:
-            return 'player 2'
+            return 'player2'
         else:
-            return 'player 1'
-    
-    
-    
+            return 'player1'
 
 
 class Player:
@@ -189,7 +177,7 @@ class Player:
     spy: Person
     possible_guesses: set[Person]
     visited: set[Person] = set()
-    _game_tree : GameTree
+    _game_tree: GameTree
 
     def __init__(self, n, spy) -> None:
         """ create a new player for the game. n represets if this is the first/second player and spy
@@ -198,15 +186,39 @@ class Player:
         self.question = []
         self.n = n
         self.spy = spy
-       
+
     def _make_guesses(self) -> str:
         """ The player makes a guess of the spy that the opponent has choses. An abstract class that would be
         implemented differently based on different players we define.
         """
         raise NotImplementedError
-
-        
-   def check_question_to_person:
-    for ---
-    if 
     
+    def _choose_spy(self, characters: list[Person]) -> None:
+        """ The player chooses the spy from the given set of characters at the start of the GuessWho game."""
+        self.spy = random.choice(characters)
+        
+        
+def run_game(player1: Player, player2: Player, characters_files: str) -> GuessWho:
+    """Run a GuessWho game between the two given players.
+
+    Use the words in word_set_file, and use max_guesses as the maximum number of guesses.
+
+    Return the AdversarialWordle instance after the game is complete.
+
+    Preconditions:
+    - word_set_file is a non-empty with one word per line
+    - all words in word_set_file have the same length
+    - max_guesses >= 1
+    """
+    # with open(word_set_file) as f:
+    #     word_set = {str.strip(line.lower()) for line in f}
+    # 
+    # game = AdversarialWordle(word_set, max_guesses)
+    # 
+    # while game.get_winner() is None:
+    #     guess = guesser.make_move(game)
+    #     game.record_guesser_move(guess)
+    #     status = adversary.make_move(game)
+    #     game.record_adversary_move(status)
+    # 
+    # return game

@@ -159,6 +159,13 @@ class GuessWho:
             return 1
 
 
+list_of_categories = [HAIR_COLOUR, HAIR_STYLES, ...]  # imported from features constants
+
+def get_list_of_category (characteristic): 
+    for lst in list_of_categories:
+        if characteristic in lst:
+            return lst
+            
 class Player:
     """ One of the player in the game
 

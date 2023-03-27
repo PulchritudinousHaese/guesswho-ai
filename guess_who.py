@@ -206,7 +206,29 @@ class Player:
     def _choose_spy(self, characters: list[Person]) -> None:
         """ The player chooses the spy from the given set of characters at the start of the GuessWho game."""
         self.spy = random.choice(characters)
-        
+    
+    def check_question_to_persons -> None: #check for each person
+        for person in self.possible_guesses:
+
+            if check_question_to_person:
+                person.up = False
+    
+    def check_question_to_person -> bool: #checks 
+        a1 = question.a1
+        if question.connective:
+            connective = question.connective
+            a2 = question.a2
+
+            if connective == 'OR':
+                if a1[0] == '0':
+                    a1 = a1[1]
+                    match(a1):
+                        case person.hair_colour == a1:
+                else:
+                    a1 = a1[1]
+                    match(a1):
+                        case a1 in HAIR_COLOUR and person.hair_colour != a1:
+
         
 def run_game(player1: Player, player2: Player, characters_files: str) -> GuessWho:
     """Run a GuessWho game between the two given players.

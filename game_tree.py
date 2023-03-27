@@ -1,6 +1,7 @@
 """CSC111 Winter 2023 Project: Guess Who Artifical Intelligence
 This module contains the GameTree class and all necessary methods to
 add respective player moves and change probabilities.
+This file is Copyright (c) 2023 Annie Wang, Mikhail Skazhenyuk, Xinyuan Gu, Ximei Lin.
 """
 from __future__ import annotations
 

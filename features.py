@@ -1,5 +1,6 @@
 """CSC111 Winter 2023 Project: Guess Who Artifical Intelligence
 This module contains the features as CONSTANTS for the game's Person class. 
+This file is Copyright (c) 2023 Annie Wang, Mikhail Skazhenyuk, Xinyuan Gu, Ximei Lin.
 """
 
 # ear_size

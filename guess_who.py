@@ -161,12 +161,19 @@ class GuessWho:
             return 1
 
 
-list_of_categories = [HAIR_COLOUR, HAIR_STYLES, ...]  # imported from features constants
+dict_categories_to_features = {ear_size:, [BIGEARS, SMALLEARS], \
+    hair_style: [STRAIGHT, CURLY, WAVY], \
+    hair_length: [LONGHAIR, MEDIUMHAIR, SHORTHAIR, BALD] \
+    hair_colour: [BLONDE, BLACK, BROWN, RED, GRAY], \
+    nose_size: [BIGNOSE, SMALLNOSE], \
+    facial_hair: [BEARD, MOUSTACHE, FULLBEARD], \
+    accessory: [HAT, REDCHEEKS], \
+    mouth_size: [BIGMOUTH, MEDIUMMOUTH, SMALLMOUTH]}  # imported from features constants
 
-def get_list_of_category (characteristic): 
-    for lst in list_of_categories:
-        if characteristic in lst:
-            return lst
+def get_list_of_category(characteristic: str) -> list[str]:
+    for category in dict_categories_to_features:
+        if characteristic in dict_categories_to_features[category]:
+            return category
             
 class Player:
     """ One of the player in the game

@@ -282,6 +282,22 @@ def run_game(player1: Player, player2: Player, characters_files: str) -> GuessWh
     #     game.record_adversary_move(status)
     # 
     # return game
-    
+       #
+    guess1 = 0
+    guess2 = 0
+
+    persons = load_persons(characters_files)
+    players = [player1, player2]
+    game = GuessWho(players, persons)
+
+    print(game)
+
+    while game.get_winner(guess1, guess2) is None:
+        guess1 = player1.make_guesses(game)
+        guess2 = player2.make_guesses(game)
+        game.record_answers(guess1)
+        game.record_answers(guess2)
+
+    return game
 
 

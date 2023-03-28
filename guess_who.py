@@ -130,9 +130,9 @@ class GuessWho:
     - len(spies) == 2
     - spy is a valid person from the given file
      """
-     guesses: list[str]
-     players: dict[int, Player]
-     characters = list[Person]
+    guesses: list[str]
+    players: dict[int, Player]
+    characters = list[Person]
 
     def __init__(self, players: list[Player], characters: list[Person]) -> None:
         """ Initialize a GuessWho game with the two players"""
@@ -140,7 +140,7 @@ class GuessWho:
         self.players = {1: players[0], 2: players[1]}
         self.characters = characters
 
-    def _record_answers(self, guess: str) -> None:
+    def record_answers(self, guess: str) -> None:
         """ Record the guesses that have been made by each player in the game, and update the game's status"""
         self.guesses.append(guess)
 
@@ -152,7 +152,7 @@ class GuessWho:
         elif guess2 == self.players[2].spy:
             return 'player2'
 
-    def _whose_turn(self) -> int:
+    def whose_turn(self) -> int:
         """ return it's which player's turn to make a guess in this round of game"""
         if len(self.guesses) % 2 == 0:
             return 2
@@ -160,20 +160,20 @@ class GuessWho:
             return 1
 
 
-dict_categories_to_features = {ear_size:, [BIGEARS, SMALLEARS], \
-    hair_style: [STRAIGHT, CURLY, WAVY], \
-    hair_length: [LONGHAIR, MEDIUMHAIR, SHORTHAIR, BALD] \
-    hair_colour: [BLONDE, BLACK, BROWN, RED, GRAY], \
-    nose_size: [BIGNOSE, SMALLNOSE], \
-    facial_hair: [BEARD, MOUSTACHE, FULLBEARD], \
-    accessory: [HAT, REDCHEEKS], \
-    mouth_size: [BIGMOUTH, MEDIUMMOUTH, SMALLMOUTH]}  # imported from features constants
-
-def get_list_of_category(characteristic: str) -> list[str]:
-    for category in dict_categories_to_features:
-        if characteristic in dict_categories_to_features[category]:
-            return category
-            
+# dict_categories_to_features = {ear_size:, [BIGEARS, SMALLEARS], \
+#     hair_style: [STRAIGHT, CURLY, WAVY], \
+#     hair_length: [LONGHAIR, MEDIUMHAIR, SHORTHAIR, BALD] \
+#     hair_colour: [BLONDE, BLACK, BROWN, RED, GRAY], \
+#     nose_size: [BIGNOSE, SMALLNOSE], \
+#     facial_hair: [BEARD, MOUSTACHE, FULLBEARD], \
+#     accessory: [HAT, REDCHEEKS], \
+#     mouth_size: [BIGMOUTH, MEDIUMMOUTH, SMALLMOUTH]}  # imported from features constants
+# 
+# def get_list_of_category(characteristic: str) -> list[str]:
+#     for category in dict_categories_to_features:
+#         if characteristic in dict_categories_to_features[category]:
+#             return category
+#             
 class Player:
     """ One of the player in the game
 
@@ -194,15 +194,15 @@ class Player:
     visited: set[Person] = set()
     _game_tree: GameTree
 
-    def __init__(self, n, spy) -> None:
-        """ create a new player for the game. n represets if this is the first/second player and spy
-        represents the chraracter this player has chosen.
+    def __init__(self, n, characters: list[Person]) -> None:
+        """ create a new player for the game. n represets if this is the first/second player and characters represent the list of characters that this
+        player can potentially choose to be the spy.
          """
         self.question = []
         self.n = n
-        self.spy = spy
+        self.spy = random.choice(characters)
 
-    def _make_guesses(self, game: GuessWho) -> str:
+    def make_guesses(self, game: GuessWho) -> str:
         """ The player makes a guess of the opponent's spy based on the current state of the game. An abstract class that would be
         implemented differently based on different players we define.
         
@@ -211,52 +211,49 @@ class Player:
         """
         raise NotImplementedError
     
-    def _choose_spy(self, characters: list[Person]) -> None:
-        """ The player chooses the spy from the given set of characters at the start of the GuessWho game."""
-        self.spy = random.choice(characters)
     
-    def check_question_to_persons(self, question: Question) -> None: #check for each person
-        for person in self.possible_guesses:
+    # def check_question_to_persons(self, question: Question) -> None: #check for each person
+    #     for person in self.possible_guesses:
+    # 
+    #         if self.check_question_to_person(question):
+    #             person.up = False
+    # 
+    # def check_question_to_person(self, question: Question) -> bool:  # checks
+    #     """
+    # 
+    #     """
+    #     a1 = question.a1
+    #     if question.connective:
+    #         connective = question.connective
+    #         a2 = question.a2
+    # 
+    #         if connective == 'OR':
+    #             if a1[0] == '0':
+    #                 a1 = a1[1]
+    #                 match (a1):
+    #                     case self.hair_colour == a1:
+    #             else:
+    #                 a1 = a1[1]
+    #                 match (a1):
+    #                     case a1 in HAIR_COLOUR and person.hair_colour != a1:
 
-            if self.check_question_to_person(question):
-                person.up = False
-
-    def check_question_to_person(self, question: Question) -> bool:  # checks
-        """
-
-        """
-        a1 = question.a1
-        if question.connective:
-            connective = question.connective
-            a2 = question.a2
-
-            if connective == 'OR':
-                if a1[0] == '0':
-                    a1 = a1[1]
-                    match (a1):
-                        case self.hair_colour == a1:
-                else:
-                    a1 = a1[1]
-                    match (a1):
-                        case a1 in HAIR_COLOUR and person.hair_colour != a1:
-
-class Question:
-    """
-    """
-    a1: str
-    connective: str
-    a2: str
-
-    def __init__(self) -> None:
-        """
-        """
-        self.a1 = ""
-        self.connective = ""
-        self.a2 = ""
-
-    def question_format:
-        #TODO
-        
+# class Question:
+#     """
+#     """
+#     a1: str
+#     connective: str
+#     a2: str
+# 
+#     def __init__(self) -> None:
+#         """
+#         """
+#         self.a1 = ""
+#         self.connective = ""
+#         self.a2 = ""
+# 
+#     def question_format:
+#         #TODO
+#         
 def run_game(player1: Player, player2: Player, characters_files: str) -> GuessWho:
     """Run a GuessWho game between the two given players.
 
@@ -285,5 +282,3 @@ def run_game(player1: Player, player2: Player, characters_files: str) -> GuessWh
         game.record_answers(guess2)
 
     return game
-
-

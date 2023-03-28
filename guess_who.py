@@ -269,19 +269,6 @@ def run_game(player1: Player, player2: Player, characters_files: str) -> GuessWh
     - all words in word_set_file have the same length
     - max_guesses >= 1
     """
-    # with open(word_set_file) as f:
-    #     word_set = {str.strip(line.lower()) for line in f}
-    # 
-    # game = AdversarialWordle(word_set, max_guesses)
-    # 
-    # while game.get_winner() is None:
-    #     guess = guesser.make_move(game)
-    #     game.record_guesser_move(guess)
-    #     status = adversary.make_move(game)
-    #     game.record_adversary_move(status)
-    # 
-    # return game
-       #
     guess1 = 0
     guess2 = 0
 

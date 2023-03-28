@@ -216,13 +216,16 @@ class Player:
         """ The player chooses the spy from the given set of characters at the start of the GuessWho game."""
         self.spy = random.choice(characters)
     
-    def check_question_to_persons -> None: #check for each person
+    def check_question_to_persons(self, question: Question) -> None: #check for each person
         for person in self.possible_guesses:
 
-            if check_question_to_person:
+            if self.check_question_to_person(question):
                 person.up = False
-    
-    def check_question_to_person -> bool: #checks 
+
+    def check_question_to_person(self, question: Question) -> bool:  # checks
+        """
+
+        """
         a1 = question.a1
         if question.connective:
             connective = question.connective
@@ -231,13 +234,29 @@ class Player:
             if connective == 'OR':
                 if a1[0] == '0':
                     a1 = a1[1]
-                    match(a1):
-                        case person.hair_colour == a1:
+                    match (a1):
+                        case self.hair_colour == a1:
                 else:
                     a1 = a1[1]
-                    match(a1):
+                    match (a1):
                         case a1 in HAIR_COLOUR and person.hair_colour != a1:
 
+class Question:
+    """
+    """
+    a1: str
+    connective: str
+    a2: str
+
+    def __init__(self) -> None:
+        """
+        """
+        self.a1 = ""
+        self.connective = ""
+        self.a2 = ""
+
+    def question_format:
+        #TODO
         
 def run_game(player1: Player, player2: Player, characters_files: str) -> GuessWho:
     """Run a GuessWho game between the two given players.
@@ -263,3 +282,6 @@ def run_game(player1: Player, player2: Player, characters_files: str) -> GuessWh
     #     game.record_adversary_move(status)
     # 
     # return game
+    
+
+

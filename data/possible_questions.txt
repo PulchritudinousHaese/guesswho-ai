@@ -1,1 +1,26 @@
-
+Does the character have big ears?
+Does the character have small ears?
+Does the character have hair?
+Does the character have straight hair?
+Does the character have curly hair?
+Does the character have wavy hair?
+Does the character have long hair?
+Does the character have medium hair?
+Does the character have short hair?
+Does the character have blonde hair?
+Does the character have black hair?
+Does the character have brown hair?
+Does the character have red hair?
+Does the character have gray hair?
+Does the character have a big nose?
+Does the character have a small nose?
+Does the character have facial hair?
+Does the character have a beard?
+Does the character have a moustache?
+Does the character have a full beard?
+Does the character have accessories?
+Does the character have a hat?
+Does the character have red cheeks?
+Does the character have a big mouth?
+Does the character have a medium mouth?
+Does the character have a small mouth?

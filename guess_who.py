@@ -130,15 +130,14 @@ class GuessWho:
     - len(spies) == 2
     - spy is a valid person from the given file
      """
-    guesses: list[str]
-    players: dict[int, Player]
-    characters = list[Person]
+     guesses: list[str]
+     players: dict[int, Player]
+     characters = list[Person]
 
-    def __init__(self, player1, player2, characters: list[Person]) -> None:
+    def __init__(self, players: list[Player], characters: list[Person]) -> None:
         """ Initialize a GuessWho game with the two players"""
         self.guesses = []
-        self.players[1] = player1
-        self.players[2] = player2
+        self.players = {1: players[0], 2: players[1]}
         self.characters = characters
 
     def _record_answers(self, guess: str) -> None:

@@ -14,13 +14,14 @@ import csv
 import random
 import copy
 import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
 from typing import Optional, Any
 
 import plotly
 import tkinter as tk
 from game_tree import GameTree
-import matplotlib.pyplot as plt
-import numpy as np
 
 from features import *
 

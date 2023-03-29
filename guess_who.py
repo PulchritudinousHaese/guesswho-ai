@@ -190,12 +190,12 @@ class Player:
         - spy is a valid person from the given file
     """
 
-    questions: list[str]
+    questions: list[str] = []
     n: int
     spy: Person
-    possible_guesses: list[Person]
-    visited: set[Person] = set()
-    _game_tree: GameTree
+    _game_tree: Optional[GameTree]
+    candidates: dict[str, dict[str, str]]
+    questions: list[str]
 
     def __init__(self, n, characters: list[Person]) -> None:
         """ create a new player for the game. n represets if this is the first/second player and characters represent the list of characters that this
@@ -204,6 +204,8 @@ class Player:
         self.question = []
         self.n = n
         self.spy = random.choice(characters)
+        self.questions = generate_all_possible_questions(game)
+        
 
     def make_guesses(self, game: GuessWho) -> str:
         """ The player makes a guess of the opponent's spy based on the current state of the game. An abstract class that would be
@@ -213,13 +215,38 @@ class Player:
          - game._whose_turn() == self.n        
         """
         raise NotImplementedError
+        
     
+     def ask_questions(self, game: GuessWho) -> str:
+        """ The player asks question about the characterstics of the spy based on the current state of the game.
+
+         Preconditions:
+            - game._whose_turn() == self.n
+        """
+        raise NotImplementedError
+        
+    def eliminate_candidates(self, generated_question: str, answer: str):
+        """ Eliminating the candidates based on the answers to the question. """
+        to_delete = []
+        for k, v in self.candidates.items():
+            if v[generated_question] != answer:
+                to_delete.append(k)
+
+        for key in to_delete:
+            del self.candidates[key]
+
+
+    def eliminate_question(self, generated_question: str):
+        """Eliminating the questions that has been asked."""
+        self.questions.remove(generated_question)
+        
     
     def check_question_to_persons(self, question: Question) -> None: #check for each person
         for person in self.possible_guesses:
     
             if self.check_question_to_person(question):
                 person.up = False
+    
     
     def check_question_to_person(self, question: Question) -> bool:  # checks
         """
@@ -239,7 +266,74 @@ class Player:
                     a1 = a1[1]
                     match (a1):
                         case a1 in HAIR_COLOUR and person.hair_colour != a1:
+                            
+                            
 
+class GreedyPlayer(Player):
+    """ A player who has the higher winning probability in the game."""
+
+    def make_guesses(self, game: GuessWho) -> str:
+        """ The player makes a guess of the name of the opponent's spy at the end of the game."""
+
+        for name in self.candidates:
+            return name
+
+    def ask_questions(self, game: GuessWho) -> str:
+        """ The player asks question about the characterstics of the spy based on the current state of the game. The
+        method mutates questions and candidates by removing the question and candodate that the player
+        has already chosen.
+
+         Preconditions:
+            - game._whose_turn() == self.n
+        """
+        scores = []
+
+        for question in self.questions:
+            count_y = 0
+            count_n = 0
+
+            for qna in self.candidates.values():
+                if qna[question] == 'Y':
+                    count_y += 1
+                else:
+                    count_n += 1
+            scores.append(abs(count_y - count_n))
+
+        min_score = min(scores)
+        min_index = scores.index(min_score)
+        self.eliminate_candidates(self.questions[min_index], 'Y')
+        self.eliminate_question(self.questions[min_index])
+
+        return self.questions[min_index]
+
+                            
+class RandomPlayer(Player):
+    """ A player who randomly asks question"""
+
+    def make_guesses(self, game: GuessWho) -> str:
+        """ The player makes a guess of the name of the opponent's spy at the last round of the game.
+
+        Precondition:
+            - len(self.candidates) == 1
+        """
+
+        for name in self.candidates:
+            return name
+
+    def ask_questions(self, game: GuessWho) -> str:
+        """ A player randomly asks questions based on the current state of game.
+
+         Preconditions:
+            - game._whose_turn() == self.n
+        """
+        question = random.choice(self.questions)
+        self.eliminate_question(question)
+        self.eliminate_candidates(question, 'Y')
+
+        return question                            
+                            
+                  
+                                               
 class Question:
     """
     """

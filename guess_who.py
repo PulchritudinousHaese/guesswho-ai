@@ -176,7 +176,42 @@ def get_list_of_category(characteristic: str) -> list[str]:
     for category in dict_categories_to_features:
         if characteristic in dict_categories_to_features[category]:
             return category
-            
+
+def create_candidates(file: str) -> dict[str, dict[str, str]]:
+    """Function to load all questions and answers  for all candidates into a dictionary
+       as determined in the file.
+
+       Precondition:
+       - file != ''
+    """
+    candidate_so_far = {}
+
+    with open(file) as csv_file:
+        reader = csv.reader(csv_file)
+        next(reader)
+
+        for row in reader:
+            d = {}
+            for i in range(0, len(row) // 2):
+                d[row[2 * i + 1]] = row[2 * i + 2]
+            candidate_so_far[row[0]] = d
+
+    return candidate_so_far        
+        
+ 
+def generate_all_possible_questions(file: str) -> list[str]:
+    """ A function to generate all questions from the file. """
+    all_questions = []
+
+    with open(file) as csv_file:
+        row = csv_file.readlines()[0]
+        for i in range(1, len(row) // 2):
+            all_questions.append(row[2 * i + 1] + '?')
+
+    return all_questions[1:]
+
+
+        
 class Player:
     """ One of the player in the game
 
@@ -267,7 +302,7 @@ class Player:
                     match (a1):
                         case a1 in HAIR_COLOUR and person.hair_colour != a1:
                             
-                            
+
 
 class GreedyPlayer(Player):
     """ A player who has the higher winning probability in the game."""
@@ -288,12 +323,9 @@ class GreedyPlayer(Player):
         """
         scores = []
 
-        for question in self.questions:
-            count_y = 0
-            count_n = 0
-
-            for qna in self.candidates.values():
-                if qna[question] == 'Y':
+        for name in self.candidates:
+            for question in self.questions:
+                if self.candidates[name][question] == 'Y':
                     count_y += 1
                 else:
                     count_n += 1

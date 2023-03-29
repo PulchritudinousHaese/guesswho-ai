@@ -32,7 +32,7 @@ SMALLNOSE = 'n'
 # facial_hair
 BEARD = 'd'
 MOUSTACHE = 'm'
-FULLBEARD = 'D'
+FULLBEARD = 'F'
 
 # accessory
 HAT = 'H'

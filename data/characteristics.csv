@@ -4,10 +4,10 @@ Alfred,E,S,L,R,n,m,X,u
 Anita,e,S,L,O,n,X,r,u
 Anne,e,C,T,B,N,X,X,u
 Bernard,E,S,T,b,N,X,H,u
-Bill, E,X,D,R,n,d,m,r,u
+Bill, E,X,D,R,n,f,m,r,u
 Charles,E,S,M,O,n,m,X,U
 Claire,e,W,M,R,n,X,X,u
-David,E,S,M,O,n,d,X,V
+David,E,S,M,O,n,f,X,V
 Eric,E,S,T,O,n,X,X,V
 Frans,E,C,T,R,n,X,X,u
 George,E,S,T,G,n,X,X,V
@@ -17,8 +17,8 @@ Maria,e,W,L,b,n,X,X,u
 Max,E,C,T,B,N,m,X,U
 Paul,E,W,M,G,n,X,X,u
 Peter,E,S,M,G,N,X,X,U
-Philip,E,C,T,B,n,D,r,V
-Richard,E,X,D,b,n,D,X,u
+Philip,E,C,T,B,n,F,r,V
+Richard,E,X,D,b,n,F,X,u
 Robert,E,S,M,b,N,X,r,u
 Sam,E,X,D,G,n,X,X,u
 Susan,e,S,L,G,n,X,r,U

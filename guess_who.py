@@ -277,8 +277,8 @@ def plot_game_statistics(result: dict[str, list[int]], player1: str, player2: st
 
      """
     df = pd.DataFrame(result)
-    ax1 = df.plot(kind='scatter', x='num_games', y='player1', color='r', label=player1)
-    ax2 = df.plot(kind='scatter', x='num_games', y='player2', color='g', label=player2, ax=ax1)
+    ax1 = df.plot(kind='scatter', x='num_games', y=player1, color='r', label=player1)
+    ax2 = df.plot(kind='scatter', x='num_games', y=player2, color='g', label=player2, ax=ax1)
 
     #specify x-axis and y-axis labels
     ax1.set_xlabel('num_games')

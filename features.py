@@ -30,7 +30,7 @@ BIGNOSE = 'N'
 SMALLNOSE = 'n'
 
 # facial_hair
-BEARD = 'd'
+BEARD = 'f'
 MOUSTACHE = 'm'
 FULLBEARD = 'F'
 

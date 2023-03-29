@@ -13,7 +13,7 @@ from __future__ import annotations
 import csv
 import random
 import copy
-
+import pandas as pd
 from typing import Optional, Any
 
 import plotly
@@ -253,7 +253,38 @@ class Question:
 
     def question_format:
         #TODO
-#         
+  
+
+def plot_game_statistics(result: dict[str, list[int]], player1: str, player2: str) -> None:
+    """ Plot the game results from the given list of games and players results. x-axis represents the num_games.
+    y-axis shows the winning state of each pleyer (0=lost, 1=won)
+
+     Results is a dictionary contaiting the number of games recorded and the results from each game. Each keys
+     represent what values are recorded in the corresponding values in terms of list.
+
+     Values of results[num_games] shows which games are recoded. Values of results[player1] and results[player2] show
+     if each player won in each game.
+
+     For example if index 0 at results[num_games] is 1, results[player1][0] and results[player2][0] are the
+     results of the first game: player 1 lost(if results[player1][0] = 0) and player2 won (if results[player2][0] =1).
+
+     Names of player1 and player 2 are determined by who is playing.
+
+    Preconditions:
+     - len(results[num_games]) >= 1
+     - len(results[num_games]) == len(results[player1]) == len(results[player2])
+     - all(isinstance(key,str) for key in results)
+
+     """
+    df = pd.DataFrame(result)
+    ax1 = df.plot(kind='scatter', x='num_games', y='player1', color='r', label=player1)
+    ax2 = df.plot(kind='scatter', x='num_games', y='player2', color='g', label=player2, ax=ax1)
+
+    #specify x-axis and y-axis labels
+    ax1.set_xlabel('num_games')
+    ax1.set_ylabel('results (0 = lost) (1 = won)')
+
+    
 def run_game(player1: Player, player2: Player, characters_files: str) -> GuessWho:
     """Run a GuessWho game between the two given players.
 

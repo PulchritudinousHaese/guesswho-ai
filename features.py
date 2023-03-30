@@ -23,6 +23,8 @@ BEARD = 'R'
 GLASSES = 'S'
 EARRING = 'T'
 BIGEARS = 'U'
+# WAVYHAIR?
+SIDEBURNS = 'V'
 
 
 # # ear_size

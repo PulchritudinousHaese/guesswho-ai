@@ -257,7 +257,7 @@ class GreedyPlayer(Player):
             count_y = 0
             count_n = 0
             for v in self.candidates.values():
-                if v[q] == "y":
+                if v[q] == "Y":
                     count_y += 1
                 else:
                     count_n += 1
@@ -293,7 +293,7 @@ class RandomPlayer(Player):
             count_y = 0
             count_n = 0
             for v in self.candidates.values():
-                if v[q] == "y":
+                if v[q] == "Y":
                     count_y += 1
                 else:
                     count_n += 1

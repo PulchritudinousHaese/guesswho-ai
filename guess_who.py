@@ -346,8 +346,8 @@ def plot_game_statistics(result: dict[str, list[int]], player1: str, player2: st
     ax1.set_ylabel('results (0 = lost) (1 = won)')
 
     
-def run_game(player1: Player, player2: Player, characters_files: str) -> GuessWho:
-    """Run a GuessWho game between the two given players.
+def run_game(player1: Player, player2: Player, characters_files: str) -> str:
+    """Run a GuessWho game between the two given players and returns the winner at the end of the game
 
     Use the words in word_set_file, and use max_guesses as the maximum number of guesses.
 
@@ -367,10 +367,17 @@ def run_game(player1: Player, player2: Player, characters_files: str) -> GuessWh
 
     print(game)
 
-    while game.get_winner(guess1, guess2) is None:
-        guess1 = player1.make_guesses(game)
-        guess2 = player2.make_guesses(game)
-        game.record_answers(guess1)
-        game.record_answers(guess2)
+    while len(player1.candidates) != 1 or len(player2.candidates) != 1:
+        question1 = player1.ask_questions(game)
+        answer1 = ...
+        player1.eliminate_candidates(question1, answer1)
+        question2 = player2.ask_questions(game)
+        answer2 = ...
+        player2.eliminate_candidates(question2, answer2)
 
-    return game
+    assert len(player1.candidates) == 1 or len(player2.candidates) == 1
+    
+    guess1 = player1.make_guesses(game)
+    guess2 = player2.make_guesses(game)
+
+    return game.get_winner(guess1, guess2)

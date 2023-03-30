@@ -24,7 +24,7 @@ import tkinter as tk
 from game_tree import GameTree
 
 from features import *
-
+from dataclasses import dataclass
 
 ########################################################################
 
@@ -63,6 +63,7 @@ def load_persons(file_name: str) -> list[Person]:
 ########################################################################
 
 # TODO: Finish attributes, initializer, determine functions necessary
+@dataclass
 class Person:
     """The main class to represent each person in the game of GuessWho.
   Instance Attributes:

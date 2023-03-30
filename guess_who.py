@@ -33,11 +33,11 @@ def load_person(person_tuple: tuple[str]) -> Person:
     Preconditions:
     - len(person_tuple) == 9
     """
-
+    p = person_tuple
     features_so_far = set()
     for p in person_tuple[1:]:
         features_so_far.add(p)
-    person = Person(person_tuple[0], features_so_far)
+    person = Person(p[0], features_so_far)
     return person
 
 
@@ -190,22 +190,15 @@ class Player:
         - spy is a valid person from the given file
     """
 
-    questions: list[str] = []
-    n: int
-    spy: Person
-    _game_tree: Optional[GameTree]
-    candidates: dict[str, dict[str, str]]
     questions: list[str]
+    candidates: dict[str, dict[str, str]]
 
-    def __init__(self, n, characters: list[Person]) -> None:
+    def __init__(self, candidates: list[Person], questions: list[str]) -> None:
         """ create a new player for the game. n represets if this is the first/second player and characters represent the list of characters that this
         player can potentially choose to be the spy.
          """
-        self.question = []
-        self.n = n
-        self.spy = random.choice(characters)
-        self.questions = generate_all_possible_questions(game)
-        
+        self.candidates = candidates
+        self.questions = questions
 
     def make_guesses(self, game: GuessWho) -> str:
         """ The player makes a guess of the opponent's spy based on the current state of the game. An abstract class that would be
@@ -239,38 +232,21 @@ class Player:
     def eliminate_question(self, generated_question: str):
         """Eliminating the questions that has been asked."""
         self.questions.remove(generated_question)
-        
-    
-    def check_question_to_persons(self, question: Question) -> None: #check for each person
-        for person in self.possible_guesses:
-    
-            if self.check_question_to_person(question):
-                person.up = False
-    
-    
-    def check_question_to_person(self, question: Question) -> bool:  # checks
-        """
-    
-        """
-        a1 = question.a1
-        if question.connective:
-            connective = question.connective
-            a2 = question.a2
-    
-            if connective == 'OR':
-                if a1[0] == '0':
-                    a1 = a1[1]
-                    match (a1):
-                        case self.hair_colour == a1:
-                else:
-                    a1 = a1[1]
-                    match (a1):
-                        case a1 in HAIR_COLOUR and person.hair_colour != a1:
-                            
-
+       
 
 class GreedyPlayer(Player):
-    """ A player who has the higher winning probability in the game."""
+    """ A player who has the higher winning probability in the game.
+    Instance Attributes:
+        - name: name of the type of player in the game.
+        - spy: the spy that the player has chosen.
+        
+    """
+    name: str
+    spy: str
+    def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
+        self.name = GreedyPlayer
+        self.spy = random.choice(characters)
+        Player. __init__(self, candidates, questions)
 
     def make_guesses(self, game: GuessWho) -> str:
         """ The player makes a guess of the name of the opponent's spy at the end of the game."""
@@ -305,7 +281,18 @@ class GreedyPlayer(Player):
 
                             
 class RandomPlayer(Player):
-    """ A player who randomly asks question"""
+    """ A player who randomly asks question
+    Instance Attributes:
+        - name: name of the type of player in the game. 
+        - spy: the spy that the player has chosen.    
+    """
+    
+    name: str
+    spy: str
+    def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
+        self.name = RandomPlayer
+        self.spy = random.choice(characters)
+        Player. __init__(self, candidates, questions)
 
     def make_guesses(self, game: GuessWho) -> str:
         """ The player makes a guess of the name of the opponent's spy at the last round of the game.
@@ -328,25 +315,6 @@ class RandomPlayer(Player):
 #         self.eliminate_candidates(question, 'Y')
         return question                            
                             
-                  
-                                               
-class Question:
-    """
-    """
-    a1: str
-    connective: str
-    a2: str
-
-    def __init__(self) -> None:
-        """
-        """
-        self.a1 = ""
-        self.connective = ""
-        self.a2 = ""
-
-    def question_format:
-        #TODO
-  
 
 def plot_game_statistics(result: dict[str, list[int]], player1: str, player2: str) -> None:
     """ Plot the game results from the given list of games and players results. x-axis represents the num_games.

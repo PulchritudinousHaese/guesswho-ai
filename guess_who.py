@@ -349,8 +349,13 @@ def run_game(player1: Player, player2: Player, characters_questions_file: str) -
 
     return game.get_winner(guess1, guess2)
 
-def run_games_and_record(player1: Player, player2: Player, num_games:int, file: str, plot: bool = False) -> dict:
+
+def run_games(player1: Player, player2: Player, num_games: int, file: str, plot: bool = False, p: bool = False) -> dict:
     """ Run GuessWho num times between player1 and player2, and record the results of each game.
+
+        Optional Parameter:
+        - plot: determines if the user wants to plot the game results in graph
+        - p: determines if the user wants to print out the winner at the end of each game
         Preconditions:
         - file is a non-empty file with questions and answers related to characteristics of each character
         at each line
@@ -360,8 +365,11 @@ def run_games_and_record(player1: Player, player2: Player, num_games:int, file: 
     for i in range(0, num_games):
         winner = run_game(player1, player2, file)
         results[winner][i] = 1
+        if p:
+            print(f'game {i + 1} winner: {winner}')
     if plot:
         plot_game_statistics(results, player1.name, player2.name)
 
     return results
+
 

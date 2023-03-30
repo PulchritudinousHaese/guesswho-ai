@@ -87,28 +87,22 @@ class Person:
 # TODO: Attributes, initializer, determine functions necessary
 class GuessWho:
     """The main class to run the game of GuessWho and represent its game_state.
-
     Instance Attributes:
     - guesses: A list representing the moves made by both players in order.
     - spies: A list representing the spies of each player (index 0 for player one, index 1 for player two)
     - players: A list of the players in the game
-
-
     Representation Invariants:
     - len(spies) == 2
     - spy is a valid person from the given file
      """
-    players: dict[1, Player]
-    characters = list[Person]
+    players: dict[int, Player]
+    process: list[str]
+    characters: dict[str, dict[str,str]]
 
-    def __init__(self, players: list[Player], characters: list[Person]) -> None:
+    def __init__(self, players: list[Player], characters_questions_file: str) -> None:
         """ Initialize a GuessWho game with the two players"""
+        self.characters = create_candidates(characters_questions_file)
         self.players = {1: players[0], 2: players[1]}
-        self.characters = characters
-
-    def record_answers(self, guess: str) -> None:
-        """ Record the guesses that have been made by each player in the game, and update the game's status"""
-        self.guesses.append(guess)
 
     def get_winner(self, guess1, guess2) -> Optional[str]:
         """ return if there is a winner in the game and which player is the winner, with the guess1 by player1
@@ -117,37 +111,31 @@ class GuessWho:
         """
         if (guess1 == self.players[1].spy) and (guess2 == self.players[2].spy):
            return 'tie'
-        if guess1 == self.players[1].spy:
-           return players[1].name
-        elif guess2 == self.players[2].spy:
-           return player2[2].name
+        if guess2 == self.players[1].spy:
+           return self.players[2].name
+        elif guess1 == self.players[2].spy:
+           return self.players[1].name
 
     def whose_turn(self) -> int:
         """ return it's which player's turn to make a guess in this round of game"""
-        if len(self.guesses) % 2 == 0:
+        if len(self.process) % 2 == 0:
             return 2
         else:
             return 1
 
 
-dict_categories_to_features = {ear_size:, [BIGEARS, SMALLEARS], \
-    hair_style: [STRAIGHT, CURLY, WAVY], \
-    hair_length: [LONGHAIR, MEDIUMHAIR, SHORTHAIR, BALD] \
-    hair_colour: [BLONDE, BLACK, BROWN, RED, GRAY], \
-    nose_size: [BIGNOSE, SMALLNOSE], \
-    facial_hair: [BEARD, MOUSTACHE, FULLBEARD], \
-    accessory: [HAT, REDCHEEKS], \
-    mouth_size: [BIGMOUTH, MEDIUMMOUTH, SMALLMOUTH]}  # imported from features constants
-
-def get_list_of_category(characteristic: str) -> list[str]:
-    for category in dict_categories_to_features:
-        if characteristic in dict_categories_to_features[category]:
-            return category
+# dict_categories_to_features = {ear_size:, [BIGEARS, SMALLEARS], \
+#     hair_style: [STRAIGHT, CURLY, WAVY], \
+#     hair_length: [LONGHAIR, MEDIUMHAIR, SHORTHAIR, BALD] \
+#     hair_colour: [BLONDE, BLACK, BROWN, RED, GRAY], \
+#     nose_size: [BIGNOSE, SMALLNOSE], \
+#     facial_hair: [BEARD, MOUSTACHE, FULLBEARD], \
+#     accessory: [HAT, REDCHEEKS], \
+#     mouth_size: [BIGMOUTH, MEDIUMMOUTH, SMALLMOUTH]}  # imported from features constants
 
 def create_candidates(file: str) -> dict[str, dict[str, str]]:
     """Function to load all questions and answers for all candidates into a dictionary
        as determined in the file.
-
        Precondition:
        - file != ''
     """
@@ -163,9 +151,9 @@ def create_candidates(file: str) -> dict[str, dict[str, str]]:
                 d[row[2 * i + 1]] = row[2 * i + 2]
             candidate_so_far[row[0]] = d
 
-    return candidate_so_far        
-        
- 
+    return candidate_so_far
+
+
 def generate_all_possible_questions(file: str) -> list[str]:
     """ A function to generate all questions from the file. """
     all_questions = []
@@ -178,48 +166,47 @@ def generate_all_possible_questions(file: str) -> list[str]:
     return all_questions[1:]
 
 
-        
 class Player:
     """ One of the player in the game
-
     Instance Attributes:
     - questions : A list representing the questions the player has asked.
     - n : an integer determining if the player is the player 0 or player 1 in the game.
     - spy : The spy this player has chosen.
-
     Representation Invariants:
         - n == 1 or n == 2
         - spy is a valid person from the given file
     """
-
+    name: str
     questions: list[str]
     candidates: dict[str, dict[str, str]]
+    spy: str
 
-    def __init__(self, candidates: list[Person], questions: list[str]) -> None:
-        """ create a new player for the game. n represets if this is the first/second player and characters represent the list of characters that this
-        player can potentially choose to be the spy.
+    def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str], name:str) -> None:
+        """ create a new player for the game. n represets if this is the first/second player and characters represent
+        the list of characters that this player can potentially choose to be the spy.
          """
+        self.spy = random.choice([name for name in candidates.keys()])
         self.candidates = candidates
         self.questions = questions
+        self.name = name
 
     def make_guesses(self, game: GuessWho) -> str:
-        """ The player makes a guess of the opponent's spy based on the current state of the game. An abstract class that would be
-        implemented differently based on different players we define.
-        
-         Preconditions: 
-         - game._whose_turn() == self.n        
+        """ The player makes a guess of the opponent's spy based on the current state of the game. An abstract class
+            that would be nimplemented differently based on different players we define.
+
+         Preconditions:
+             - game._whose_turn() == self.n
         """
         raise NotImplementedError
-        
-    
-     def ask_questions(self, game: GuessWho) -> str:
-        """ The player asks question about the characterstics of the spy based on the current state of the game.
 
+
+    def ask_questions(self, game: GuessWho) -> str:
+        """ The player asks question about the characterstics of the spy based on the current state of the game.
          Preconditions:
             - game._whose_turn() == self.n
         """
         raise NotImplementedError
-        
+
     def eliminate_candidates(self, generated_question: str, answer: str):
         """ Eliminating the candidates based on the answers to the question. """
         to_delete = []
@@ -234,21 +221,17 @@ class Player:
     def eliminate_question(self, generated_question: str):
         """Eliminating the questions that has been asked."""
         self.questions.remove(generated_question)
-       
+
 
 class GreedyPlayer(Player):
     """ A player who has the higher winning probability in the game.
     Instance Attributes:
         - name: name of the type of player in the game.
         - spy: the spy that the player has chosen.
-        
+
     """
-    name: str
-    spy: str
     def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
-        self.name = GreedyPlayer
-        self.spy = random.choice(characters)
-        Player. __init__(self, candidates, questions)
+        Player. __init__(self, candidates, questions, 'GreedyPlayer')
 
     def make_guesses(self, game: GuessWho) -> str:
         """ The player makes a guess of the name of the opponent's spy at the end of the game."""
@@ -260,7 +243,6 @@ class GreedyPlayer(Player):
         """ The player asks question about the characterstics of the spy based on the current state of the game. The
         method mutates questions and candidates by removing the question and candodate that the player
         has already chosen.
-
          Preconditions:
             - game._whose_turn() == self.n
         """
@@ -283,24 +265,15 @@ class GreedyPlayer(Player):
 
         return self.questions[min_index]
 
-                            
+
 class RandomPlayer(Player):
-    """ A player who randomly asks question
-    Instance Attributes:
-        - name: name of the type of player in the game. 
-        - spy: the spy that the player has chosen.    
+    """ A player who randomly asks question without using a strategy.
     """
-    
-    name: str
-    spy: str
     def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
-        self.name = RandomPlayer
-        self.spy = random.choice(characters)
-        Player. __init__(self, candidates, questions)
+        Player. __init__(self, candidates, questions, 'RandomPlayer')
 
     def make_guesses(self, game: GuessWho) -> str:
         """ The player makes a guess of the name of the opponent's spy at the last round of the game.
-
         Precondition:
             - len(self.candidates) == 1
         """
@@ -310,80 +283,80 @@ class RandomPlayer(Player):
 
     def ask_questions(self, game: GuessWho) -> str:
         """ A player randomly asks questions based on the current state of game.
-
          Preconditions:
             - game._whose_turn() == self.n
         """
         question = random.choice(self.questions)
         self.eliminate_question(question)
-#         self.eliminate_candidates(question, 'Y')
-        return question                            
-                            
+        # self.eliminate_candidates(question, 'Y')
+        return question
+
 
 def plot_game_statistics(result: dict[str, list[int]], player1: str, player2: str) -> None:
     """ Plot the game results from the given list of games and players results. x-axis represents the num_games.
     y-axis shows the winning state of each pleyer (0=lost, 1=won)
-
      Results is a dictionary contaiting the number of games recorded and the results from each game. Each keys
      represent what values are recorded in the corresponding values in terms of list.
-
      Values of results[num_games] shows which games are recoded. Values of results[player1] and results[player2] show
      if each player won in each game.
-
      For example if index 0 at results[num_games] is 1, results[player1][0] and results[player2][0] are the
      results of the first game: player 1 lost(if results[player1][0] = 0) and player2 won (if results[player2][0] =1).
-
      Names of player1 and player 2 are determined by who is playing.
-
     Preconditions:
      - len(results[num_games]) >= 1
      - len(results[num_games]) == len(results[player1]) == len(results[player2])
      - all(isinstance(key,str) for key in results)
-
      """
     df = pd.DataFrame(result)
     ax1 = df.plot(kind='scatter', x='num_games', y=player1, color='r', label=player1)
-    ax2 = df.plot(kind='scatter', x='num_games', y=player2, color='g', label=player2, ax=ax1)
+    df.plot(kind='scatter', x='num_games', y=player2, color='g', label=player2, ax=ax1)
 
     #specify x-axis and y-axis labels
     ax1.set_xlabel('num_games')
     ax1.set_ylabel('results (0 = lost) (1 = won)')
 
-    
-def run_game(player1: Player, player2: Player, characters_questions_files: str) -> str:
+
+def run_game(player1: Player, player2: Player, characters_questions_file: str) -> str:
     """Run a GuessWho game between the two given players and returns the winner at the end of the game
-
     Use the words in word_set_file, and use max_guesses as the maximum number of guesses.
-
     Return the AdversarialWordle instance after the game is complete.
 
     Preconditions:
     - word_set_file is a non-empty with one word per line
-    - all words in word_set_file have the same length
-    - max_guesses >= 1
     """
-    persons = load_persons(characters_files)
     players = [player1, player2]
-    game = GuessWho(players, persons)
-    questions =  generate_all_possible_questions(characters_questions_files)
-    candidates = create_candidates(characters_questions_files)
-
+    game = GuessWho(players,characters_questions_file)
 
     while (len(player1.candidates) != 1) or (len(player2.candidates) != 1):
         question1 = player1.ask_questions(game)
         answer1 = ...
-        print(f'question1: {question1}
-                answer1: {answer1}')
+        print(f'question1: {question1} answer1: {answer1}')
         player1.eliminate_candidates(question1, answer1)
         question2 = player2.ask_questions(game)
         answer2 = ...
         player2.eliminate_candidates(question2, answer2)
-        print(f'question2: {question2}
-                answer2: {answer2}')
+        print(f'question2: {question2} answer2: {answer2}')
 
     assert len(player1.candidates) == 1 or len(player2.candidates) == 1
-    
+
     guess1 = player1.make_guesses(game)
     guess2 = player2.make_guesses(game)
 
     return game.get_winner(guess1, guess2)
+
+def run_games_and_record(player1: Player, player2: Player, num_games:int, file: str, plot: bool = False) -> dict:
+    """ Run GuessWho num times between player1 and player2, and record the results of each game.
+        Preconditions:
+        - file is a non-empty file with questions and answers related to characteristics of each character
+        at each line
+    """
+    default = [0] * num_games
+    results = {'num_games': [i for i in range(1, num_games + 1)], player1.name: default, player2.name: default}
+    for i in range(0, num_games):
+        winner = run_game(player1, player2, file)
+        results[winner][i] = 1
+    if plot:
+        plot_game_statistics(results, player1.name, player2.name)
+
+    return results
+

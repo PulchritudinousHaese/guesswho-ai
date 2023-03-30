@@ -330,15 +330,15 @@ def run_game(player1: Player, player2: Player, characters_questions_file: str) -
     - word_set_file is a non-empty with one word per line
     """
     players = [player1, player2]
-    game = GuessWho(players,characters_questions_file)
+    game = GuessWho(players, characters_questions_file)
 
     while (len(player1.candidates) != 1) or (len(player2.candidates) != 1):
         question1 = player1.ask_questions(game)
-        answer1 = ...
+        answer1 = game.return_answer(question1, 2)
         print(f'question1: {question1} answer1: {answer1}')
         player1.eliminate_candidates(question1, answer1)
         question2 = player2.ask_questions(game)
-        answer2 = ...
+        answer2 = game.return_answer(question2, 1)
         player2.eliminate_candidates(question2, answer2)
         print(f'question2: {question2} answer2: {answer2}')
 

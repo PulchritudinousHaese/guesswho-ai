@@ -123,6 +123,10 @@ class GuessWho:
             return 2
         else:
             return 1
+    def return_answer(self, question: str, player_num: int) -> str:
+        """ Answer yes or no to the questiont that one player has asked, regarding the spy that player_num has chosen"""
+        veridy_with = self.players[player_num]
+        return self.candidates[veridy_with.spy][question]
 
 
 # dict_categories_to_features = {ear_size:, [BIGEARS, SMALLEARS], \

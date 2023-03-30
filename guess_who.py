@@ -33,11 +33,11 @@ def load_person(person_tuple: tuple[str]) -> Person:
     Preconditions:
     - len(person_tuple) == 9
     """
-    p = person_tuple
+
     features_so_far = set()
     for p in person_tuple[1:]:
         features_so_far.add(p)
-    person = Person(p[0], features_so_far)
+    person = Person(person_tuple[0], features_so_far)
     return person
 
 

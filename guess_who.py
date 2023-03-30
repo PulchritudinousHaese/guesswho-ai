@@ -152,10 +152,9 @@ def create_candidates(file: str) -> dict[str, dict[str, str]]:
 
         for row in reader:
             d = {}
-            for i in range(0, len(row) // 2):
+            for i in range(0, (len(row) - 1) // 2):
                 d[row[2 * i + 1]] = row[2 * i + 2]
             candidate_so_far[row[0]] = d
-
     return candidate_so_far
 
 

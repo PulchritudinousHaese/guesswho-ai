@@ -145,6 +145,8 @@ def create_candidates(file: str) -> dict[str, dict[str, str]]:
        - file != ''
     """
     candidate_so_far = {}
+    limited_candidates = {}
+    b = 0
 
     with open(file) as csv_file:
         reader = csv.reader(csv_file)
@@ -155,8 +157,13 @@ def create_candidates(file: str) -> dict[str, dict[str, str]]:
             for i in range(0, (len(row) - 1) // 2):
                 d[row[2 * i + 1]] = row[2 * i + 2]
             candidate_so_far[row[0]] = d
-    return candidate_so_far
 
+        while b != num_cha:
+            added_pair = random.choice(list(candidate_so_far.items()))
+            if added_pair[0] not in limited_candidates:
+                limited_candidates[added_pair[0]] = added_pair[1]
+                b += 1
+        return limited_candidates
 
 def generate_all_possible_questions(file: str) -> list[str]:
     """ A function to generate all questions from the file. """

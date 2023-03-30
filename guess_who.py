@@ -98,13 +98,11 @@ class GuessWho:
     - len(spies) == 2
     - spy is a valid person from the given file
      """
-    guesses: list[str]
-    players: dict[int, Player]
+    players: dict[1, Player]
     characters = list[Person]
 
     def __init__(self, players: list[Player], characters: list[Person]) -> None:
         """ Initialize a GuessWho game with the two players"""
-        self.guesses = []
         self.players = {1: players[0], 2: players[1]}
         self.characters = characters
 
@@ -114,11 +112,15 @@ class GuessWho:
 
     def get_winner(self, guess1, guess2) -> Optional[str]:
         """ return if there is a winner in the game and which player is the winner, with the guess1 by player1
-        and guess2 by player2"""
+        and guess2 by player2. Guess1 is the guess made by player1 and guess2 is the guess by player2. There is a tie if both guessers have guessed
+        the spy of the opponent.
+        """
+        if (guess1 == self.players[1].spy) and (guess2 == self.players[2].spy):
+           return 'tie'
         if guess1 == self.players[1].spy:
-            return 'player1'
+           return players[1].name
         elif guess2 == self.players[2].spy:
-            return 'player2'
+           return player2[2].name
 
     def whose_turn(self) -> int:
         """ return it's which player's turn to make a guess in this round of game"""
@@ -143,7 +145,7 @@ def get_list_of_category(characteristic: str) -> list[str]:
             return category
 
 def create_candidates(file: str) -> dict[str, dict[str, str]]:
-    """Function to load all questions and answers  for all candidates into a dictionary
+    """Function to load all questions and answers for all candidates into a dictionary
        as determined in the file.
 
        Precondition:
@@ -346,7 +348,7 @@ def plot_game_statistics(result: dict[str, list[int]], player1: str, player2: st
     ax1.set_ylabel('results (0 = lost) (1 = won)')
 
     
-def run_game(player1: Player, player2: Player, characters_files: str) -> str:
+def run_game(player1: Player, player2: Player, characters_questions_files: str) -> str:
     """Run a GuessWho game between the two given players and returns the winner at the end of the game
 
     Use the words in word_set_file, and use max_guesses as the maximum number of guesses.
@@ -358,22 +360,24 @@ def run_game(player1: Player, player2: Player, characters_files: str) -> str:
     - all words in word_set_file have the same length
     - max_guesses >= 1
     """
-    guess1 = 0
-    guess2 = 0
-
     persons = load_persons(characters_files)
     players = [player1, player2]
     game = GuessWho(players, persons)
+    questions =  generate_all_possible_questions(characters_questions_files)
+    candidates = create_candidates(characters_questions_files)
 
-    print(game)
 
-    while len(player1.candidates) != 1 or len(player2.candidates) != 1:
+    while (len(player1.candidates) != 1) or (len(player2.candidates) != 1):
         question1 = player1.ask_questions(game)
         answer1 = ...
+        print(f'question1: {question1}
+                answer1: {answer1}')
         player1.eliminate_candidates(question1, answer1)
         question2 = player2.ask_questions(game)
         answer2 = ...
         player2.eliminate_candidates(question2, answer2)
+        print(f'question2: {question2}
+                answer2: {answer2}')
 
     assert len(player1.candidates) == 1 or len(player2.candidates) == 1
     

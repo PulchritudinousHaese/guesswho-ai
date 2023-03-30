@@ -298,7 +298,7 @@ class GreedyPlayer(Player):
 
         min_score = min(scores)
         min_index = scores.index(min_score)
-        self.eliminate_candidates(self.questions[min_index], 'Y')
+#         self.eliminate_candidates(self.questions[min_index], 'Y')
         self.eliminate_question(self.questions[min_index])
 
         return self.questions[min_index]
@@ -325,8 +325,7 @@ class RandomPlayer(Player):
         """
         question = random.choice(self.questions)
         self.eliminate_question(question)
-        self.eliminate_candidates(question, 'Y')
-
+#         self.eliminate_candidates(question, 'Y')
         return question                            
                             
                   

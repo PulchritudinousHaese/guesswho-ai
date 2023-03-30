@@ -30,19 +30,20 @@ from features import *
 
 def load_person(person_tuple: tuple[str]) -> Person:
     """Returns a Person from the defined string of characteristics.
-
     Preconditions:
     - len(person_tuple) == 9
     """
     p = person_tuple
-    person = Person(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8])
+    features_so_far = set()
+    for p in person_tuple[1:]:
+        features_so_far.add(p)
+    person = Person(p[0], features_so_far)
     return person
 
 
 def load_persons(file_name: str) -> list[Person]:
     """Function to load all features into a list of Person classes
     as determined in the file file_name.
-
     Precondition:
     - file_name != ''
     """
@@ -63,62 +64,26 @@ def load_persons(file_name: str) -> list[Person]:
 
 # TODO: Finish attributes, initializer, determine functions necessary
 class Person:
-  """The main class to represent each person in the game of GuessWho.
-
+    """The main class to represent each person in the game of GuessWho.
   Instance Attributes:
   - name: The person's name (for the final guess)
-  - ear_size: The size of the person's ears.
-  - hair_style: The person's hairstyle. None if none.
-  - hair_length: The person's hair length.
-  - hair_colour: The person's hair colour. None if none.
-  - nose_size: The person's nose size.
-  - facial_hair: The person's facial_hair. None if none.
-  - accessory: The person's accesory. None if none.
-  - mouth_size: The person's mouth size.
+  - features: A set of all the person's features
   - up: Boolean whether the person has been guessed/eliminated or not.
-
   Representation Invariants:
-  - self.name != ''
-  - self.ear_size != ''
-  - self.hair_style != '' or self.hair_style is None
-  - self.hair_length != '' or self.hair_length is None
-  - self.hair_colour != '' or self.hair_colour is None
-  - self.nose_size != ''
-  - self.facial_hair != '' or self.facial_hair is None
-  - self.accessory != '' or self.accessory is None
-  - self.mouth_size != ''
-  - self.up is True or self.up is False
-
-  >>> p = Person(
+  - self.features != set()
   """
-  name: str
-  ear_size: str
-  hair_style: Optional[str]
-  hair_length: Optional[str]
-  hair_colour: Optional[str]
-  nose_size: str
-  facial_hair: Optional[str]
-  accessory: Optional[str]
-  mouth_size: str
-  up: bool
+    name: str
+    features: set[str]
+    up: bool
 
-  def __init__(self, name:str, ear_size: str, hair_style: Optional[str],
-             hair_length: Optional[str], hair_colour: Optional[str],
-             nose_size: str, facial_hair: Optional[str], accessory: Optional[str],
-             mouth_size: str, up: bool = True) -> None:
-    """Initialize Person with given Instance Attributes. """
+    def __init__(self, name: str, features: set[str], up: bool = True) -> None:
+        """Initialize Person with given Instance Attributes. """
 
-    self.name = name
-    self.ear_size = ear_size
-    self.hair_style = hair_style
-    self.hair_length = hair_length
-    self.hair_colour = hair_colour
-    self.nose_size = nose_size
-    self.facial_hair = facial_hair
-    self.accessory = accessory
-    self.mouth_size = mouth_size
-    self.up = up
-
+        self.name = name
+        self.features = features
+        self.up = up
+        
+        
 # TODO: Attributes, initializer, determine functions necessary
 class GuessWho:
     """The main class to run the game of GuessWho and represent its game_state.

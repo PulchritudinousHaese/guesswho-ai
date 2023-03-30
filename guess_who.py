@@ -265,6 +265,8 @@ class GreedyPlayer(Player):
             - game._whose_turn() == self.n
         """
         scores = []
+        count_y = 0
+        count_n = 0
 
         for name in self.candidates:
             for question in self.questions:
@@ -276,7 +278,7 @@ class GreedyPlayer(Player):
 
         min_score = min(scores)
         min_index = scores.index(min_score)
-#         self.eliminate_candidates(self.questions[min_index], 'Y')
+        # self.eliminate_candidates(self.questions[min_index], 'Y')
         self.eliminate_question(self.questions[min_index])
 
         return self.questions[min_index]

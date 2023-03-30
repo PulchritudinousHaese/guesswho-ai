@@ -138,9 +138,10 @@ class GuessWho:
 #     accessory: [HAT, REDCHEEKS], \
 #     mouth_size: [BIGMOUTH, MEDIUMMOUTH, SMALLMOUTH]}  # imported from features constants
 
-def create_candidates(file: str) -> dict[str, dict[str, str]]:
+def create_candidates(file: str, num_cha: int) -> dict[str, dict[str, str]]:
     """Function to load all questions and answers for all candidates into a dictionary
-       as determined in the file.
+       as determined in the file. Create the candidates dictionary with num_cha characters.
+        
        Precondition:
        - file != ''
     """
@@ -157,6 +158,7 @@ def create_candidates(file: str) -> dict[str, dict[str, str]]:
             for i in range(0, (len(row) - 1) // 2):
                 d[row[2 * i + 1]] = row[2 * i + 2]
             candidate_so_far[row[0]] = d
+        print(len(candidate_so_far))
 
         while b != num_cha:
             added_pair = random.choice(list(candidate_so_far.items()))
@@ -164,6 +166,7 @@ def create_candidates(file: str) -> dict[str, dict[str, str]]:
                 limited_candidates[added_pair[0]] = added_pair[1]
                 b += 1
         return limited_candidates
+
 
 def generate_all_possible_questions(file: str) -> list[str]:
     """ A function to generate all questions from the file. """

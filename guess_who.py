@@ -352,9 +352,8 @@ def plot_game_statistics(result: dict[str, list[int]], player1: str, player2: st
 
 
 def run_game(players: list[Player], candidates: dict[str, dict[str, str]]) -> str:
-    """Run a GuessWho game between the two given players and returns the winner at the end of the game
-    Use the words in word_set_file, and use max_guesses as the maximum number of guesses.
-    Return the AdversarialWordle instance after the game is complete.
+    """Run a GuessWho game between the two given players and returns the winner at the end of the game.
+    Use candidates dictionaty. 
 
     Preconditions:
     - word_set_file is a non-empty with one word per line

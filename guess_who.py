@@ -288,6 +288,29 @@ class RandomPlayer(Player):
          Preconditions:
             - game._whose_turn() == self.n
         """
+        question = random.choice(self.questions)
+        self.eliminate_question(question)
+        return question
+    
+class PoorPlayer(Player):
+    """ A player who deliberately chooses the worst qurestion.
+    """
+    def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
+        Player. __init__(self, candidates, questions, 'PoorPlayer')
+
+    def make_guesses(self, game: GuessWho) -> str:
+        """ The player makes a guess of the name of the opponent's spy at the last round of the game.
+        Precondition:
+            - len(self.candidates) == 1
+        """
+        for name in self.candidates:
+            return name
+
+    def ask_questions(self, game: GuessWho) -> str:
+        """ A player randomly asks questions based on the current state of game.
+         Preconditions:
+            - game._whose_turn() == self.n
+        """
         scores = []
         for q in self.questions:
             count_y = 0
@@ -302,9 +325,7 @@ class RandomPlayer(Player):
         max_score = max(scores)
         max_index = scores.index(max_score)
         return self.questions[max_index]
-        # question = random.choice(self.questions)
-        # self.eliminate_question(question)
-        # return question
+
 
 
 def plot_game_statistics(result: dict[str, list[int]], player1: str, player2: str) -> None:
@@ -347,13 +368,12 @@ def run_game(players: list[Player], candidates: dict[str, dict[str, str]]) -> st
 
     while (len(player1.candidates) != 1) and (len(player2.candidates) != 1):
         question1 = player1.ask_questions(game)
-        answer1 = game.return_answer(question1, 2)
-        # print(f'question1: {question1} answer1: {answer1}')
+        answer1 = game.return_answer(question1, 2）
         player1.eliminate_candidates(question1, answer1)
         question2 = player2.ask_questions(game)
         answer2 = game.return_answer(question2, 1)
         player2.eliminate_candidates(question2, answer2)
-        # print(f'question2: {question2} answer2: {answer2}')
+  
 
     assert len(player1.candidates) == 1 or len(player2.candidates) == 1
 
@@ -362,8 +382,6 @@ def run_game(players: list[Player], candidates: dict[str, dict[str, str]]) -> st
     print(f'guess1: {guess1}, guess2: {guess2}')
 
     print(f'winner {game.get_winner(guess1, guess2)}')
-
-
 
     return game.get_winner(guess1, guess2)
 
@@ -378,16 +396,23 @@ def run_games(players: list, num_cha: int, num_games: int, file: str, plot: bool
         - file is a non-empty file with questions and answers related to characteristics of each character
         at each line
     """
+def run_games(players: list, num: int, can: dict[str, dict[str, str]], plot: bool = False, p: bool = False) -> dict:
+    """ Run GuessWho num times between player1 and player2, and record the results of each game.
+
+        Optional Parameter:
+        - plot: determines if the user wants to plot the game results in graph
+        - p: determines if the user wants to print out the winner at the end of each game
+        Preconditions:
+        - file is a non-empty file with questions and answers related to characteristics of each character
+        at each line
+    """
     player1 = players[0]
     player2 = players[1]
-    default = [0] * num_games
-    results = {'num_games': [i for i in range(1, num_games + 1)], player1.name: default, player2.name: default}
-    for i in range(0, num_games):
-        winner = run_game(players, file, num_cha)
-        if winner == 'tie':
-            results[player1.name][i] = 0.5
-            results[player2.name][i] = 0.5
-        else:
+    default = [0] * num
+    results = {'num_games': [i for i in range(1, num + 1)], player1.name: default, player2.name: default}
+    for i in range(0, num):
+        winner = run_game(players, candidates)
+        if winner == player1.name or winner == player2.name:
             results[winner][i] = 1
         if p:
             print(f'game {i + 1} winner: {winner}')
@@ -402,8 +427,6 @@ if __name__ == '__main__':
     candidates1 = candidates.copy()
     candidates2 = candidates.copy()
     questions = generate_all_possible_questions('data/questions.csv')
-    print(len(f'questions: {len(questions)}'))
-    #print(len(create_candidates('data/questions.csv', 6)))
     player1 = GreedyPlayer(candidates, questions)
     player2 = RandomPlayer(candidates1, questions)
     run_game([player1, player2], candidates2)

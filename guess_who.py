@@ -358,11 +358,9 @@ def plot_game_statistics(result: dict[str, list[int]], player1: str, player2: st
 
 def run_game(players: list[Player], candidates: dict[str, dict[str, str]]) -> str:
     """Run a GuessWho game between the two given players and returns the winner at the end of the game.
-   Use candidates as the candidates_questions dictionary in the game. 
-  
-
-    Preconditions:
-    - word_set_file is a non-empty with one word per line
+       Use candidates as the candidates_questions dictionary in the game. 
+       Preconditions:
+        - candidates is not an empty dictionary.
     """
 
     player1 = players[0]

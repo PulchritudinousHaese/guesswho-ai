@@ -56,8 +56,6 @@ def load_persons(file_name: str) -> list[Person]:
 
 
 ########################################################################
-
-# TODO: Finish attributes, initializer, determine functions necessary
 @dataclass
 class Person:
     """The main class to represent each person in the game of GuessWho.
@@ -132,15 +130,6 @@ class GuessWho:
         verify_with = self.players[player_num]
         return self.candidates[verify_with.spy][question]
 
-
-# dict_categories_to_features = {ear_size:, [BIGEARS, SMALLEARS], \
-#     hair_style: [STRAIGHT, CURLY, WAVY], \
-#     hair_length: [LONGHAIR, MEDIUMHAIR, SHORTHAIR, BALD] \
-#     hair_colour: [BLONDE, BLACK, BROWN, RED, GRAY], \
-#     nose_size: [BIGNOSE, SMALLNOSE], \
-#     facial_hair: [BEARD, MOUSTACHE, FULLBEARD], \
-#     accessory: [HAT, REDCHEEKS], \
-#     mouth_size: [BIGMOUTH, MEDIUMMOUTH, SMALLMOUTH]}  # imported from features constants
 
 def create_candidates(file: str, num_cha: int) -> dict[str, dict[str, str]]:
     """Function to load all questions and answers for all candidates into a dictionary
@@ -368,9 +357,9 @@ def plot_game_statistics(result: dict[str, list[int]], player1: str, player2: st
 
 
 def run_game(players: list[Player], candidates: dict[str, dict[str, str]]) -> str:
-    """Run a GuessWho game between the two given players and returns the winner at the end of the game
-    Use the words in word_set_file, and use max_guesses as the maximum number of guesses.
-    Return the AdversarialWordle instance after the game is complete.
+    """Run a GuessWho game between the two given players and returns the winner at the end of the game.
+   Use candidates as the candidates_questions dictionary in the game. 
+  
 
     Preconditions:
     - word_set_file is a non-empty with one word per line

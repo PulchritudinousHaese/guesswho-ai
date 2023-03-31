@@ -218,8 +218,6 @@ class Player:
         for k, v in self.candidates.items():
             if v[generated_question] != answer:
                 to_delete.append(k)
-        # print(f'{self.name} candidates {len(self.candidates)}')
-        # print(f'to delete{to_delete}')
         for key in to_delete:
             del self.candidates[key]
 

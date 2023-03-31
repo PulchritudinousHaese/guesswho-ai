@@ -348,9 +348,7 @@ def plot_game_statistics(result: dict[str, list[int]], player1: str, player2: st
     df = pd.DataFrame(result)
     ax1 = df.plot(kind='scatter', x='num_games', y=player1, color='r', label=player1)
     df.plot(kind='scatter', x='num_games', y=player2, color='g', label=player2, ax=ax1)
-
-    #specify x-axis and y-axis labels
-    ax1.set_xlabel('num_games')
+    ax1.set_xlabel('number_of_games')
     ax1.set_ylabel('results (0 = lost) (1 = won)')
     plt.show()
 
@@ -372,12 +370,10 @@ def run_game(players: list[Player], candidates: dict[str, dict[str, str]]) -> st
     while len(player1.candidates) != 1 and len(player2.candidates) != 1 and p1_question != [] and p2_question != []:
         question1 = player1.ask_questions(game)
         answer1 = game.return_answer(question1, 2)
-        # print(f'question1: {question1} answer1: {answer1}')
         player1.eliminate_candidates(question1, answer1)
         question2 = player2.ask_questions(game)
         answer2 = game.return_answer(question2, 1)
         player2.eliminate_candidates(question2, answer2)
-        # print(f'question2: {question2} answer2: {answer2}')
 
     guess1 = player1.make_guesses(game)
     guess2 = player2.make_guesses(game)

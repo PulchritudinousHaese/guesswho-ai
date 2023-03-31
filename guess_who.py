@@ -107,16 +107,17 @@ class GuessWho:
             - Both guessers have guessed the spy of the opponent.
             - Both players have run out of questions to ask.
         """
-        if (guess1 == self.players[1].spy) and (guess2 == self.players[2].spy):
-            return 'tie'
-        elif not self.players[1].questions:
+        if not self.players[1].questions:
             return self.players[2].name
         elif not self.players[2].questions:
             return self.players[1].name
+        elif (guess1 == self.players[1].spy) and (guess2 == self.players[2].spy):
+            return 'tie'
         elif guess2 == self.players[1].spy:
             return self.players[2].name
         elif guess1 == self.players[2].spy:
             return self.players[1].name
+
 
     def whose_turn(self) -> int:
         """ return it's which player's turn to make a guess in this round of game"""

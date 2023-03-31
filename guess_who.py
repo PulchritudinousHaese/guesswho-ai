@@ -13,8 +13,10 @@ import csv
 import random
 import pandas as pd
 import matplotlib.pyplot as plt
+from dataclasses import dataclass
 
 from typing import Optional
+from features import *
 
 import tkinter as tk
 
@@ -54,6 +56,9 @@ def load_persons(file_name: str) -> list[Person]:
 
 
 ########################################################################
+
+# TODO: Finish attributes, initializer, determine functions necessary
+@dataclass
 class Person:
     """The main class to represent each person in the game of GuessWho.
   Instance Attributes:
@@ -127,6 +132,15 @@ class GuessWho:
         verify_with = self.players[player_num]
         return self.candidates[verify_with.spy][question]
 
+
+# dict_categories_to_features = {ear_size:, [BIGEARS, SMALLEARS], \
+#     hair_style: [STRAIGHT, CURLY, WAVY], \
+#     hair_length: [LONGHAIR, MEDIUMHAIR, SHORTHAIR, BALD] \
+#     hair_colour: [BLONDE, BLACK, BROWN, RED, GRAY], \
+#     nose_size: [BIGNOSE, SMALLNOSE], \
+#     facial_hair: [BEARD, MOUSTACHE, FULLBEARD], \
+#     accessory: [HAT, REDCHEEKS], \
+#     mouth_size: [BIGMOUTH, MEDIUMMOUTH, SMALLMOUTH]}  # imported from features constants
 
 def create_candidates(file: str, num_cha: int) -> dict[str, dict[str, str]]:
     """Function to load all questions and answers for all candidates into a dictionary
@@ -218,6 +232,8 @@ class Player:
         for k, v in self.candidates.items():
             if v[generated_question] != answer:
                 to_delete.append(k)
+        # print(f'{self.name} candidates {len(self.candidates)}')
+        # print(f'to delete{to_delete}')
         for key in to_delete:
             del self.candidates[key]
 
@@ -352,8 +368,9 @@ def plot_game_statistics(result: dict[str, list[int]], player1: str, player2: st
 
 
 def run_game(players: list[Player], candidates: dict[str, dict[str, str]]) -> str:
-    """Run a GuessWho game between the two given players and returns the winner at the end of the game.
-    Use candidates dictionaty. 
+    """Run a GuessWho game between the two given players and returns the winner at the end of the game
+    Use the words in word_set_file, and use max_guesses as the maximum number of guesses.
+    Return the AdversarialWordle instance after the game is complete.
 
     Preconditions:
     - word_set_file is a non-empty with one word per line
@@ -421,16 +438,10 @@ def run_games(num: int,  players: list[Player], num_cha: int, file: csv, plot: b
 
 
 if __name__ == '__main__':
-    ### an example to run_games. Comment out if you need to test the function. Can change the Player class if needed.
-#     candidates = create_candidates('data/questions.csv', 12)
-#     candidates1 = candidates.copy()
-#     candidates2 = candidates.copy()
-#     questions = generate_all_possible_questions('data/questions.csv')
-#     player1 = GreedyPlayer(candidates, questions)
-#     player2 = PoorPlayer(candidates1, questions)
-#     run_games(100, [player1, player2], 12, 'data/questions.csv', True, True)
-    
-    
-
-
-
+    candidates = create_candidates('data/questions.csv', 12)
+    candidates1 = candidates.copy()
+    candidates2 = candidates.copy()
+    questions = generate_all_possible_questions('data/questions.csv')
+    player1 = GreedyPlayer(candidates, questions)
+    player2 = RandomPlayer(candidates1, questions)
+    run_games(100, [player1, player2], 12, 'data/questions.csv', True, True)

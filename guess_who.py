@@ -81,21 +81,25 @@ class Person:
 class GuessWho:
     """The main class to run the game of GuessWho and represent its game_state.
     Instance Attributes:
-    - guesses: A list representing the moves made by both players in order.
-    - spies: A list representing the spies of each player (index 0 for player one, index 1 for player two)
-    - players: A list of the players in the game
+    - players: A dictionary represents each player where key is used to represent
+    the first or second player and their corresponding value is themselves.
+    - candidates: A dictionary represents all possible 24 characters where key is
+    each character's name and their corresponding values are the questions about
+    appearance and the regarding answers.
+    - process: A list contains the question has been asked at each round of the game.
     Representation Invariants:
-    - len(spies) == 2
-    - spy is a valid person from the given file
+    - len(players) == 2
      """
     players: dict[int, Player]
-    process: list[str]
     candidates: dict[str, dict[str, str]]
+    process: list[str]
 
     def __init__(self, players: list[Player], candidates: dict[str, dict[str, str]]) -> None:
         """ Initialize a GuessWho game with the two players"""
         self.candidates = candidates
         self.players = {1: players[0], 2: players[1]}
+        self.process = []
+       
 
     def get_winner(self, guess1, guess2) -> Optional[str]:
         """ return if there is a winner in the game and which player is the winner, with the guess1 by player1
@@ -131,6 +135,7 @@ class GuessWho:
     def return_answer(self, question: str, player_num: int) -> str:
         """ Answer yes or no to the questiont that one player has asked, regarding the spy that player_num has chosen"""
         verify_with = self.players[player_num]
+        self.process.append(question)
         return self.candidates[verify_with.spy][question]
 
 

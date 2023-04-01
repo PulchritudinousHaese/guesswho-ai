@@ -73,7 +73,7 @@ if __name__ == '__main__':
     # player2 = RandomPlayer(candidates1, questions)
     # run_games(100, [player1, player2], 12, 'data/questions.csv', True, True)
 
-    # You should notive a more nuanced difference between performance of these two players compared to
-    # that between PoorPlayer and GreedyPlayer. Sometimes GreedyPlayer and RandoPlayer may even have the same 
+    # You should notice a more nuanced difference between the performance of RandomPlayer and GreedyPlayer
+    # and the performance of PoorPlayer and GreedyPlayer. Sometimes GreedyPlayer and RandoPlayer may even have the same 
     # winning probability!
 

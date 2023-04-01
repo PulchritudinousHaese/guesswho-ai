@@ -107,7 +107,9 @@ class GuessWho:
             - Both guessers have guessed the spy of the opponent.
             - Both players have run out of questions to ask.
         """
-        if not self.players[1].questions:
+        if not self.players[1].questions and not self.players[2].questions
+            return 'tie'
+        elif not self.players[1].questions:
             return self.players[2].name
         elif not self.players[2].questions:
             return self.players[1].name

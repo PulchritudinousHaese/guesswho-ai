@@ -1,154 +1,213 @@
+"""CSC111 Winter 2023 Project: Guess Who Artificial Intelligence
+This module contains the subclassess AI from parent class AI (Player) in guess_who.py and the
+necessary functions to backend of the classic game "Guess Who".
 This file is Copyright (c) 2023 Annie Wang, Mikhail Skazhenyuk, Xinyuan Gu, Ximei Lin.
 """
-import random
-from typing import Optional
-
+from guess_who import Player, GuessWho
 import guess_who
-#import a2_adversarial_wordle as aw
+import csv
+import random
+import pandas as pd
+import matplotlib.pyplot as plt
+from dataclasses import dataclass
 
-class ExplorinGuesser(aw.Guesser):
-    """A Guesser player that sometimes plays greedily and sometimes plays randomly.
+from typing import Optional
+from features import *
 
-    See assignment handout for details.
+import tkinter as tk
 
-    Representation Invariants:
-        - 0.0 <= self._exploration_probability <= 1.0
+########################################################################
+
+class GreedyPlayer(Player):
+    """ A player who has the higher winning probability in the game.
+    Instance Attributes:
+        - name: name of the type of player in the game.
+        - spy: the spy that the player has chosen.
     """
-    # Private Instance Attributes:
-    #   - _game_tree:
-    #       The GameTree that this player uses to make its moves. If None, then this
-    #       player just makes random moves.
-    #   - _exploration_probability:
-    #       The probability that this player ignores its game tree and makes a random move.
-    _game_tree: Optional[a2_game_tree.GameTree]
-    _exploration_probability: float
+    def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
+        Player.__init__(self, candidates, questions, 'GreedyPlayer')
 
-    def __init__(self, game_tree: a2_game_tree.GameTree, exploration_probability: float) -> None:
-        """Initialize this player."""
-        self._game_tree = game_tree
-        self._exploration_probability = exploration_probability
+    def make_guesses(self, game: GuessWho) -> str:
+        """ The player makes a guess of the name of the opponent's spy at the end of the game."""
 
-    def make_move(self, game: aw.AdversarialWordle) -> str:
-        """Make a move given the current game.
+        for name in self.candidates:
+            return name
 
-        Preconditions:
-            - game.is_guesser_turn()
+    def ask_questions(self, game: GuessWho) -> str:
+        """ The player asks question about the characterstics of the spy based on the current state of the game. The
+        method mutates questions and candidates by removing the question and candodate that the player
+        has already chosen.
+         Preconditions:
+            - game._whose_turn() == self.n
         """
-        possible_answers = game.get_possible_answers()
-        # Update game tree to corresponding move - None if no subtree
-        if len(game.statuses) > 0 and self._game_tree is not None:
-            current_status = game.statuses[-1]
-            if not self._game_tree.get_subtrees():  # If there are no subtrees
-                self._game_tree = None
-            else:
-                self._game_tree = self._game_tree.find_subtree_by_move(current_status)
+        scores = []
+        for q in self.questions:
+            count_y = 0
+            count_n = 0
+            for v in self.candidates.values():
+                if v[q] == "Y":
+                    count_y += 1
+                else:
+                    count_n += 1
+            scores.append(abs(count_y - count_n))
+        min_score = min(scores)
+        min_index = scores.index(min_score)
+        question = self.questions[min_index]
+        self.eliminate_question(question)
+        return question
 
-        if self._game_tree is not None and self._game_tree.get_subtrees():
-            x = random.uniform(0, 1)
-            if x < self._exploration_probability:
-                move = random.choice(list(possible_answers))
-                self._game_tree = self._game_tree.find_subtree_by_move(move)
-                return move
-            else:
-                probability = self.probability_extreme()
-                trees_so_far = []
 
-                for subtree in self._game_tree.get_subtrees():
+#@check_contract
+class RandomPlayer(Player):
+    """ A player who randomly asks question without using a strategy.
+    """
+    def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
+        Player. __init__(self, candidates, questions, 'RandomPlayer')
 
-                    if probability == subtree.guesser_win_probability:
-                        trees_so_far.append(subtree)
+    def make_guesses(self, game: GuessWho) -> str:
+        """ The player makes a guess of the name of the opponent's spy at the last round of the game.
+        Precondition:
+            - len(self.candidates) == 1
+        """
+        for name in self.candidates:
+            return name
 
-                tree = random.choice(trees_so_far)
-                self._game_tree = tree
+    def ask_questions(self, game: GuessWho) -> str:
+        """ A player randomly asks questions based on the current state of game.
+         Preconditions:
+            - game._whose_turn() == self.n
+        """
+        question = random.choice(self.questions)
+        self.eliminate_question(question)
+        return question
 
-                return tree.move
-        else:
-            return random.choice(possible_answers)
 
-    def probability_extreme(self) -> float:
-        """Returns the min of probabilities in the current subtrees"""
-        probabilities = {x.guesser_win_probability for x in self._game_tree.get_subtrees()}
-        return max(probabilities)
+class PoorPlayer(Player):
+    """ A player who deliberately chooses the worst qurestion.
+    """
+    def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
+        Player.__init__(self, candidates, questions, 'PoorPlayer')
 
-def run_learning_algorithm(
-        characters_file: str, 
-        questions_file: str,
-        exploration_probabilities: list[float],
-        show_stats: bool = True) -> a2_game_tree.GameTree:
-    """Play a sequence of AdversarialWordle games using an ExploringGuesser and RandomAdversary.
+    def make_guesses(self, game: GuessWho) -> str:
+        """ The player makes a guess of the name of the opponent's spy at the last round of the game.
+        Precondition:
+            - len(self.candidates) == 1
+        """
+        for name in self.candidates:
+            return name
 
-    This algorithm first initializes an empty GameTree. All ExploringGuessers will use this
-    SAME GameTree object, which will be mutated over the course of the algorithm!
-    Return this object.
+    def ask_questions(self, game: GuessWho) -> str:
+        """ A player randomly asks questions based on the current state of game.
+         Preconditions:
+            - game._whose_turn() == self.n
+        """
+        scores = []
+        for q in self.questions:
+            count_y = 0
+            count_n = 0
+            for v in self.candidates.values():
+                if v[q] == "Y":
+                    count_y += 1
+                else:
+                    count_n += 1
+            scores.append(abs(count_y - count_n))
 
-    There are len(exploration_probabilities) games played, where at game i (starting at 0):
-        - The Guesser is an ExploringGuesser (using the game tree) whose exploration probability
-            is equal to exploration_probabilities[i].
-        - The Adversary is a RandomAdversary.
-        - AFTER the game, the move sequence from the game is inserted into the game tree,
-          with a guesser win probability of 1.0 if the Guesser won the game, and 0.0 otherwise.
+        max_score = max(scores)
+        max_index = scores.index(max_score)
+        question = self.questions[max_index]
+        self.eliminate_question(question)
+        return question
 
+
+def plot_game_statistics(result: dict[str, list[int]], player1: str, player2: str) -> None:
+    """ Plot the game results from the given list of games and players results. x-axis represents the num_games.
+    y-axis shows the winning state of each pleyer (0=lost, 1=won)
+     Results is a dictionary contaiting the number of games recorded and the results from each game. Each keys
+     represent what values are recorded in the corresponding values in terms of list.
+     Values of results[num_games] shows which games are recoded. Values of results[player1] and results[player2] show
+     if each player won in each game.
+     For example if index 0 at results[num_games] is 1, results[player1][0] and results[player2][0] are the
+     results of the first game: player 1 lost(if results[player1][0] = 0) and player2 won (if results[player2][0] =1).
+     Names of player1 and player 2 are determined by who is playing.
     Preconditions:
-        - word_set_file and max_guesses satisfy the preconditions of aw.run_game
-        - all(0.0 <= p <= 1.0 for p in exploration_probabilities)
-        - exploration_probabilities != []
+     - len(results[num_games]) >= 1
+     - len(results[num_games]) == len(results[player1]) == len(results[player2])
+     - all(isinstance(key,str) for key in results)
+     """
+    df = pd.DataFrame(result)
+    ax1 = df.plot(kind='scatter', x='num_games', y=player1, color='r', label=player1)
+    df.plot(kind='scatter', x='num_games', y=player2, color='g', label=player2, ax=ax1)
+    ax1.set_xlabel('number_of_games')
+    ax1.set_ylabel('results (0 = lost) (1 = won)')
+    plt.show()
 
-    Implementation notes:
-        - A NEW ExploringGuesser instance should be created for each loop iteration.
-          However, each one should use the SAME GameTree object.
-        - You should call aw.run_game, NOT aw.run_games. This is because you need more control
-          over what happens after each game runs, which you can get by writing your own loop
-          that calls run_game. However, you can base your loop on the implementation of run_games.
-        - Note that aw.run_game returns the AdversarialWordle game instance. You may need to review
-          the documentation for that class to figure out what methods are useful here.
-        - You may call print in this function to report progress made in each game.
-        - This function must return the final GameTree object. You can inspect the
-          guesser_win_probability of its nodes, calculate its size, or use it in a
-          RandomTreeGuesser or GreedyTreeGuesser to see how they do with it.
+
+def run_game(players: list[Player], candidates: dict[str, dict[str, str]]) -> str:
+    """Run a GuessWho game between the two given players and returns the winner at the end of the game.
+       Use candidates as the candidates_questions dictionary in the game.
+       Preconditions:
+        - candidates is not an empty dictionary.
     """
-    results = []
-    game_tree = a2_game_tree.GameTree()
-    for probability in exploration_probabilities:
-        gsr = ExploringGuesser(game_tree, probability)
-        adv = aw.RandomAdversary()
-        game = aw.run_game(gsr, adv, word_set_file, max_guesses)
-        winner = game.get_winner()
-        if winner == 'Guesser':
-            game_tree.insert_move_sequence(game.get_move_sequence(), 1.0)
-        else:
-            game_tree.insert_move_sequence(game.get_move_sequence())
-        results.append(winner)
-    if show_stats:
-        aw.plot_game_statistics(results)
-    # print(game_tree)
-    return game_tree
+
+    player1 = players[0]
+    player2 = players[1]
+    game = GuessWho(players, candidates)
+    p1_question = game.players[1].questions
+    p2_question = game.players[2].questions
+    while len(player1.candidates) != 1 and len(player2.candidates) != 1 and p1_question != [] and p2_question != []:
+        question1 = player1.ask_questions(game)
+        answer1 = game.return_answer(question1, 2)
+        player1.eliminate_candidates(question1, answer1)
+        question2 = player2.ask_questions(game)
+        answer2 = game.return_answer(question2, 1)
+        player2.eliminate_candidates(question2, answer2)
+
+    guess1 = player1.make_guesses(game)
+    guess2 = player2.make_guesses(game)
+
+    return game.get_winner(guess1, guess2)
 
 
-def linear_function(n: int) -> list[float]:
-    """Goes from 0.0 to 1.0 in n steps."""
-    return [1.0 - 1 / n * point for point in range(0, n + 1)]
-
-
-def piece_wise_function(n: int, m: int) -> list[float]:
-    """Goes from 1.0 to 0.0 in n steps and then the next m steps are 0.0"""
-    return [1.0 - 1 / n * point for point in range(0, n + 1)] + [0.0] * m
-
-
-def part3_runner() -> a2_game_tree.GameTree:
-    """Run example for Part 3.
-
-    Please note that unlike part1_runner and part2_runner, this function is NOT tested.
-    We encourage you to experiment with different exploration probability sequences
-    to see how quickly you can develop a "winning" GameTree!
+def run_games(num: int,  players: list[Player], num_cha: int, file: csv, plot: bool = False, p: bool = False) -> dict:
+    """ Run GuessWho num times between player1 and player2 with characters in file and num_cha of characters .
+     The function returns the results of each game.
+        Optional Parameter:
+        - plot: determines if the user wants to plot the game results in graph
+        - p: determines if the user wants to print out the winning probability of each player
+        Preconditions:
+        - file is a non-empty file with questions and answers related to characteristics of each character
+        at each line
     """
-    word_set_file = 'data/words/official_wordle_100.txt'
-    max_guesses = 4
+    default = [0] * num
+    default1 = default.copy()
+    player1 = players[0]
+    player2 = players[1]
+    pl1_name = players[0].name
+    pl2_name = players[1].name
+    results = {'num_games': [n for n in range(1, num + 1)], pl1_name: default, pl2_name: default1}
+    game_sta = {players[0].name: 0, players[1].name: 0}
+    for i in range(0, num):
+        can = Guess_who.create_candidates(file, num_cha)
+        question = Guess_who.generate_all_possible_questions(file)
+        player1.candidates = can
+        player2.candidates = can.copy()
+        player1.questions = question
+        player2.questions = question.copy()
+        player1.select_spy()
+        player2.select_spy()
+        winner = run_game([player1, player2], can.copy())
+        if winner == player1.name or winner == player2.name:
+            game_sta[winner] += 1
+            results[winner][i] = 1
+    if p:
+        pl1_wins = game_sta[pl1_name]
+        pl2_wins = game_sta[pl2_name]
+        print(f'[winning_probability:{pl1_name}: {(pl1_wins/num) * 100}%, {pl2_name}: {(pl2_wins/num) * 100}%]')
+    if plot:
+        plot_game_statistics(results, player1.name, player2.name)
 
-    probabilities = [0.5] * 4000
-    # probabilities = linear_function(4000)
-    # probabilities = piece_wise_function(2000, 2000)
+    return results
 
-    return run_learning_algorithm(word_set_file, max_guesses, probabilities, show_stats=True)
 
 
 if __name__ == '__main__':
@@ -163,4 +222,13 @@ if __name__ == '__main__':
     #     'extra-imports': ['random', 'a2_adversarial_wordle', 'a2_game_tree'],
     #     'allowed-io': ['run_learning_algorithm']
     # })
-    part3_runner()
+    candidates = guess_who.create_candidates('data/questions.csv', 12)
+    candidates1 = candidates.copy()
+    candidates2 = candidates.copy()
+    questions = guess_who.generate_all_possible_questions('data/questions.csv')
+    player1 = GreedyPlayer(candidates, questions)
+    player2 = RandomPlayer(candidates1, questions)
+    run_games(100, [player1, player2], 12, 'data/questions.csv', True, True)
+
+    
+   

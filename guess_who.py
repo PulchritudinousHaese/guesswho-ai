@@ -32,7 +32,7 @@ def load_person(person_tuple: tuple[str]) -> Person:
     features_so_far = set()
     for p in person_tuple[1:]:
         features_so_far.add(p)
-    person = Person(person_tuple[0], features_so_far)
+    person = Person(p[0], features_so_far)
     return person
 
 
@@ -56,6 +56,8 @@ def load_persons(file_name: str) -> list[Person]:
 
 
 ########################################################################
+
+# TODO: Finish attributes, initializer, determine functions necessary
 @dataclass
 class Person:
     """The main class to represent each person in the game of GuessWho.
@@ -81,27 +83,24 @@ class Person:
 class GuessWho:
     """The main class to run the game of GuessWho and represent its game_state.
     Instance Attributes:
-    - players: A dictionary represents each player where key is used to represent
-    the first or second player and their corresponding value is themselves.
-    - candidates: A dictionary represents all possible 24 characters where key is
-    each character's name and their corresponding values are the questions about
-    appearance and the regarding answers.
-    - process: A list contains the question has been asked at each round of the game.
+    - guesses: A list representing the moves made by both players in order.
+    - spies: A list representing the spies of each player (index 0 for player one, index 1 for player two)
+    - players: A list of the players in the game
     Representation Invariants:
-    - len(players) == 2
+    - len(spies) == 2
+    - spy is a valid person from the given file
      """
     players: dict[int, Player]
-    candidates: dict[str, dict[str, str]]
     process: list[str]
+    candidates: dict[str, dict[str, str]]
 
     def __init__(self, players: list[Player], candidates: dict[str, dict[str, str]]) -> None:
         """ Initialize a GuessWho game with the two players"""
         self.candidates = candidates
         self.players = {1: players[0], 2: players[1]}
         self.process = []
-       
 
-    def get_winner(self, guess1, guess2) -> Optional[str]:
+    def get_winner(self) -> Optional[str]:
         """ return if there is a winner in the game and which player is the winner, with the guess1 by player1
         and guess2 by player2. Guess1 is the guess made by player1 and guess2 is the guess by player2.
         One of the player wins if :
@@ -117,13 +116,15 @@ class GuessWho:
             return self.players[2].name
         elif not self.players[2].questions:
             return self.players[1].name
-        elif (guess1 == self.players[1].spy) and (guess2 == self.players[2].spy):
-            return 'tie'
-        elif guess2 == self.players[1].spy:
-            return self.players[2].name
-        elif guess1 == self.players[2].spy:
-            return self.players[1].name
-
+        elif len(self.players[1].candidates) == 1 or len(self.players[2].candidates) == 1:
+            guess1 = self.players[1].make_guesses()
+            guess2 = self.players[2].make_guesses()
+            if (guess1 == self.players[1].spy) and (guess2 == self.players[2].spy):
+                return 'tie'
+            elif guess2 == self.players[1].spy:
+                return self.players[2].name
+            elif guess1 == self.players[2].spy:
+                return self.players[1].name
 
     def whose_turn(self) -> int:
         """ return it's which player's turn to make a guess in this round of game"""
@@ -135,8 +136,27 @@ class GuessWho:
     def return_answer(self, question: str, player_num: int) -> str:
         """ Answer yes or no to the questiont that one player has asked, regarding the spy that player_num has chosen"""
         verify_with = self.players[player_num]
-        self.process.append(question)
         return self.candidates[verify_with.spy][question]
+
+    def copy_and_record_player_move(self, question: str) -> GuessWho:
+        """Return a copy of this game state with the question.
+
+        """
+        new_game = self._copy()
+        new_game.record_player_move(question)
+        return new_game
+
+    def _copy(self) -> GuessWho:
+        """Return a copy of this game state."""
+        new_game = GuessWho([player for player in self.players.values()], self.candidates)
+        new_game.process.extend(self.process)
+        return new_game
+
+    def record_player_move(self, question: str) -> None:
+        """Record the given question by the player.
+
+        """
+        self.process.append(question)
 
 
 def create_candidates(file: str, num_cha: int) -> dict[str, dict[str, str]]:
@@ -184,7 +204,7 @@ class Player:
     """ One of the player in the game
     Instance Attributes:
     - the name of the player.
-    - questions : A list representing questions the player can ask.
+    - questions : A list representing the questions the player has asked.
     - n : an integer determining if the player is the player 0 or player 1 in the game.
     - spy : The spy this player has chosen.
     Representation Invariants:
@@ -207,7 +227,7 @@ class Player:
         """ The player selects the docstring"""
         self.spy = random.choice([name for name in self.candidates.keys()])
 
-    def make_guesses(self, game: GuessWho) -> str:
+    def make_guesses(self) -> str:
         """ The player makes a guess of the opponent's spy based on the current state of the game. An abstract class
             that would be nimplemented differently based on different players we define.
 
@@ -216,7 +236,7 @@ class Player:
         """
         raise NotImplementedError
 
-    def ask_questions(self, game: GuessWho) -> str:
+    def ask_questions(self) -> str:
         """ The player asks question about the characterstics of the spy based on the current state of the game.
          Preconditions:
             - game._whose_turn() == self.n
@@ -237,18 +257,3 @@ class Player:
     def eliminate_question(self, generated_question: str):
         """Eliminating the questions that has been asked."""
         self.questions.remove(generated_question)
-
-
-
-if __name__ == '__main__':
-    # When you are ready to check your work with python_ta, uncomment the following lines.
-    # (In PyCharm, select the lines below and press Ctrl/Cmd + / to toggle comments.)
-    # You can use "Run file in Python Console" to run PythonTA,
-    # and then also test your methods manually in the console.
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'max-nested-blocks': 4,
-    #     'extra-imports': ['random', 'a2_adversarial_wordle', 'a2_game_tree'],
-    #     'allowed-io': ['run_learning_algorithm']
-    # })

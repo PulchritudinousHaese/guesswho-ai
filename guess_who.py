@@ -184,7 +184,7 @@ class Player:
     """ One of the player in the game
     Instance Attributes:
     - the name of the player.
-    - questions : A list representing the questions the player has asked.
+    - questions : A list representing questions the player can ask.
     - n : an integer determining if the player is the player 0 or player 1 in the game.
     - spy : The spy this player has chosen.
     Representation Invariants:

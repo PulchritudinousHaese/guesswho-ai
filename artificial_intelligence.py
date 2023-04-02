@@ -33,12 +33,6 @@ def generate_complete_game_tree(root_move: str | game_tree.STARTING_MOVE, game: 
 
     Preconditions:
         - d >= 0
-        - root_move == a2_game_tree.GAME_START_MOVE or root_move is a valid move
-        - if root_move == a2_game_tree.GAME_START_MOVE, then game_state is in the initial game state
-        - if isinstance(root_move, str) and root_move != a2_game_tree.GAME_START_MOVE,\
-            then (game_state.guesses[-1] == root_move) and (not game_state.is_guesser_turn())
-        - if isinstance(root_move, tuple),\
-            then (game_state.statuses[-1] == root_move) and game_state.is_guesser_turn()
     """
     tree = game_tree.GameTree(root_move)
     if d == 0 or game.get_winner() is not None:

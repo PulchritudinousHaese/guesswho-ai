@@ -120,7 +120,6 @@ def run_learning_algorithm(file: str, max_guesses: int, probabilities: list[floa
     can = Guess_who.create_candidates(file, max_guesses)
     quest = Guess_who.generate_all_possible_questions(file)
 
-
     for probability in probabilities:
         p1 = ExploringPlayer(tree, probability)
         p2 = RandomPlayer(can, quest)

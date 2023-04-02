@@ -158,6 +158,14 @@ class GuessWho:
         """
         self.process.append(question)
 
+    def get_move_sequence(self) -> list[str]:
+        """Return the move sequence made in this game.
+
+        The returned list contains all questions that have been asked in the game.
+
+        """
+        return self.process
+
 
 def create_candidates(file: str, num_cha: int) -> dict[str, dict[str, str]]:
     """Function to load all questions and answers for all candidates into a dictionary

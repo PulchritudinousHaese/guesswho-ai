@@ -9,12 +9,11 @@ import csv
 import random
 import pandas as pd
 import matplotlib.pyplot as plt
-from dataclasses import dataclass
+from python_ta.contracts import check_contracts
+
 
 from typing import Optional
-from features import *
 
-import tkinter as tk
 
 ########################################################################
 
@@ -24,6 +23,7 @@ class GreedyPlayer(Player):
         - name: name of the type of player in the game.
         - spy: the spy that the player has chosen.
     """
+
     def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
         Player.__init__(self, candidates, questions, 'GreedyPlayer')
 
@@ -57,12 +57,13 @@ class GreedyPlayer(Player):
         return question
 
 
-#@check_contract
+
 class RandomPlayer(Player):
     """ A player who randomly asks question without using a strategy.
     """
+
     def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
-        Player. __init__(self, candidates, questions, 'RandomPlayer')
+        Player.__init__(self, candidates, questions, 'RandomPlayer')
 
     def make_guesses(self, game: GuessWho) -> str:
         """ The player makes a guess of the name of the opponent's spy at the last round of the game.
@@ -85,6 +86,7 @@ class RandomPlayer(Player):
 class PoorPlayer(Player):
     """ A player who deliberately chooses the worst qurestion.
     """
+
     def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
         Player.__init__(self, candidates, questions, 'PoorPlayer')
 
@@ -119,7 +121,7 @@ class PoorPlayer(Player):
         return question
 
 
-def plot_game_statistics(result: dict[str, list[int]], player1: str, player2: str) -> None:
+def plot_winner_statistics(result1: dict[str, list[int]], player1: str, player2: str) -> None:
     """ Plot the game results from the given list of games and players results. x-axis represents the num_games.
     y-axis shows the winning state of each pleyer (0=lost, 1=won)
      Results is a dictionary contaiting the number of games recorded and the results from each game. Each keys
@@ -134,25 +136,44 @@ def plot_game_statistics(result: dict[str, list[int]], player1: str, player2: st
      - len(results[num_games]) == len(results[player1]) == len(results[player2])
      - all(isinstance(key,str) for key in results)
      """
-    df = pd.DataFrame(result)
+    df = pd.DataFrame(result1)
     ax1 = df.plot(kind='scatter', x='num_games', y=player1, color='r', label=player1)
     df.plot(kind='scatter', x='num_games', y=player2, color='g', label=player2, ax=ax1)
     ax1.set_xlabel('number_of_games')
     ax1.set_ylabel('results (0 = lost) (1 = won)')
     plt.show()
 
+    
+def plot_num_games_statistics(result2: dict[str, list[int]]) -> None:
+    """ Plot the number of questions that each player asks in each game
 
-def run_game(players: list[Player], candidates: dict[str, dict[str, str]]) -> str:
+        Preconditions:
+     - len(results[num_games]) >= 1
+     - len(results[num_games]) == len(results[player1]) == len(results[player2])
+     - all(isinstance(key,str) for key in results)
+
+    """
+    df = pd.DataFrame(result2)
+    ax2 = df.plot(kind='scatter', x='num_games', y='num_questions', color='b')
+    ax2.set_xlabel('number_of_games')
+    ax2.set_ylabel('number_questions_each_game')
+    plt.show()
+
+
+@check_contracts
+def run_game(players: list[Player], candidates: dict[str, dict[str, str]]) -> dict[str, str | int]:
     """Run a GuessWho game between the two given players and returns the winner at the end of the game.
-       Use candidates as the candidates_questions dictionary in the game.
+       Use candidates as the self.candidates of the game. Return a dictionary containing the winner and the number of
+       questions each player asks.
        Preconditions:
         - candidates is not an empty dictionary.
+        - all({player.spy is not None for player in players})
     """
-
-    player1 = players[0]
-    player2 = players[1]
     game = GuessWho(players, candidates)
-    p1_question = game.players[1].questions
+    player1 = game.players[1]
+    player2 = game.players[2]
+    single_result = {'winner': None, 'num_questions': 0}
+    p1_question = player1.questions
     p2_question = game.players[2].questions
     while len(player1.candidates) != 1 and len(player2.candidates) != 1 and p1_question != [] and p2_question != []:
         question1 = player1.ask_questions(game)
@@ -161,53 +182,57 @@ def run_game(players: list[Player], candidates: dict[str, dict[str, str]]) -> st
         question2 = player2.ask_questions(game)
         answer2 = game.return_answer(question2, 1)
         player2.eliminate_candidates(question2, answer2)
+        single_result['num_questions'] += 1
 
     guess1 = player1.make_guesses(game)
     guess2 = player2.make_guesses(game)
+    winner = game.get_winner(guess1, guess2)
+    single_result['winner'] = winner
 
-    return game.get_winner(guess1, guess2)
+    return single_result
 
 
-def run_games(num: int,  players: list[Player], num_cha: int, file: csv, plot: bool = False, p: bool = False) -> dict:
+def run_games(num: int, players: list[Player], num_cha: int, file: csv, plot: bool, p: bool = False) -> Optional[str]:
     """ Run GuessWho num times between player1 and player2 with characters in file and num_cha of characters .
-     The function returns the results of each game.
+        The function returns the results of each game. Parameter plot determines if the user wants to plot the game
+        results and number of questions asked in each game.
         Optional Parameter:
-        - plot: determines if the user wants to plot the game results in graph
-        - p: determines if the user wants to print out the winning probability of each player
+        - p: determines if the user wants to print out the winning probability of each player, and the number of
+        questions asked by each player in every round.
         Preconditions:
         - file is a non-empty file with questions and answers related to characteristics of each character
         at each line
     """
     default = [0] * num
     default1 = default.copy()
-    player1 = players[0]
-    player2 = players[1]
-    pl1_name = players[0].name
-    pl2_name = players[1].name
-    results = {'num_games': [n for n in range(1, num + 1)], pl1_name: default, pl2_name: default1}
+    pl1 = players[0]
+    pl2 = players[1]
+    results = {'num_games': [n for n in range(1, num + 1)], pl1.name: default, pl2.name: default1}
+    num_q = {'num_games': [n for n in range(1, num + 1)], 'num_questions': []}
     game_sta = {players[0].name: 0, players[1].name: 0}
     for i in range(0, num):
-        can = Guess_who.create_candidates(file, num_cha)
-        question = Guess_who.generate_all_possible_questions(file)
-        player1.candidates = can
-        player2.candidates = can.copy()
-        player1.questions = question
-        player2.questions = question.copy()
-        player1.select_spy()
-        player2.select_spy()
-        winner = run_game([player1, player2], can.copy())
-        if winner == player1.name or winner == player2.name:
-            game_sta[winner] += 1
-            results[winner][i] = 1
-    if p:
-        pl1_wins = game_sta[pl1_name]
-        pl2_wins = game_sta[pl2_name]
-        print(f'[winning_probability:{pl1_name}: {(pl1_wins/num) * 100}%, {pl2_name}: {(pl2_wins/num) * 100}%]')
+        can = guess_who.create_candidates(file, num_cha)
+        question = guess_who.generate_all_possible_questions(file)
+        pl1.candidates = can
+        pl2.candidates = can.copy()
+        pl1.questions = question
+        pl2.questions = question.copy()
+        pl1.select_spy()
+        pl2.select_spy()
+        result = run_game([pl1, pl2], can.copy())
+        if result['winner'] == pl1.name or result['winner'] == pl2.name:
+            game_sta[result['winner']] += 1
+            results[result['winner']][i] = 1
+        num_q['num_questions'].append(result['num_questions'])
+
     if plot:
-        plot_game_statistics(results, player1.name, player2.name)
+        plot_winner_statistics(results, pl1.name, pl2.name)
+        plot_num_games_statistics(num_q)
 
-    return results
-
+    if p:
+        wins_1 = game_sta[pl1.name]
+        wins_2 = game_sta[pl2.name]
+        return f'[winning_probability:{pl1.name}: {(wins_1 / num) * 100}%, {pl2.name}: {(wins_2 / num) * 100}%]'
 
 
 if __name__ == '__main__':
@@ -222,13 +247,14 @@ if __name__ == '__main__':
     #     'extra-imports': ['random', 'a2_adversarial_wordle', 'a2_game_tree'],
     #     'allowed-io': ['run_learning_algorithm']
     # })
-    candidates = guess_who.create_candidates('data/questions.csv', 12)
+    candidates = guess_who.create_candidates('data/questions.csv', 16)
     candidates1 = candidates.copy()
     candidates2 = candidates.copy()
     questions = guess_who.generate_all_possible_questions('data/questions.csv')
     player1 = GreedyPlayer(candidates, questions)
-    player2 = RandomPlayer(candidates1, questions)
-    run_games(100, [player1, player2], 12, 'data/questions.csv', True, True)
+    player2 = PoorPlayer(candidates1, questions)
+    player1.select_spy()
+    player2.select_spy()
+    # print(run_game([player1, player2], candidates2))
 
-    
-   
+    print(run_games(100, [player1, player2], 12, 'data/questions.csv', True, True))

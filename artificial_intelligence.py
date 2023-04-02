@@ -10,13 +10,73 @@ import random
 import pandas as pd
 import matplotlib.pyplot as plt
 from python_ta.contracts import check_contracts
-
+import game_tree
 
 from typing import Optional
 
 
 ########################################################################
+# GameTree
+#############
+def generate_complete_game_tree(root_move: str | game_tree.STARTING_MOVE, game: guess_who.GuessWho,
+                                d: int) -> game_tree.GameTree:
+    """Generate a complete game tree of depth d for all valid moves from the current game_state.
 
+    For the returned GameTree:
+        - Its root move is root_move.
+        - It contains all possible move sequences of length <= d from game_state.
+        - If d == 0, a size-one GameTree is returned.
+
+    Note that some paths down the tree may have length < d, because they result in a game state
+    with a winner in fewer than d moves. Concretely, if game_state.get_winner() is not None,
+    then return just a size-one GameTree containing the root move.
+
+    Preconditions:
+        - d >= 0
+        - root_move == a2_game_tree.GAME_START_MOVE or root_move is a valid move
+        - if root_move == a2_game_tree.GAME_START_MOVE, then game_state is in the initial game state
+        - if isinstance(root_move, str) and root_move != a2_game_tree.GAME_START_MOVE,\
+            then (game_state.guesses[-1] == root_move) and (not game_state.is_guesser_turn())
+        - if isinstance(root_move, tuple),\
+            then (game_state.statuses[-1] == root_move) and game_state.is_guesser_turn()
+    """
+    tree = game_tree.GameTree(root_move)
+    if d == 0 or game.get_winner() is not None:
+        if game.get_winner() == game.players[1].name:
+            tree.player1_win_probability = 1.0
+            return tree
+        elif game.get_winner() == game.players[2].name:
+            tree.player2_win_probability = 1.0
+            return tree
+        else:
+            tree.win_probability = 0.0
+            return tree
+
+    elif game.whose_turn() == 1:
+        possible_questions = game.players[1].questions
+        for question in possible_questions:
+            game.players[1].questions.remove(question)
+            answer = game.return_answer(question, 2)
+            game.players[1].eliminate_candidates(question, answer)
+            new_state = game.copy_and_record_player_move(question)
+            sub = generate_complete_game_tree(question, new_state, d - 1)
+            tree.add_subtree(sub)
+            tree.update_tree_probabilities()
+        return tree
+    else:
+        possible_questions = game.players[2].questions
+        for question in possible_questions:
+            game.players[2].questions.remove(question)
+            answer = game.return_answer(question, 1)
+            game.players[2].eliminate_candidates(question, answer)
+            new_state = game.copy_and_record_player_move(question)
+            sub = generate_complete_game_tree(question, new_state, d - 1)
+            tree.add_subtree(sub)
+            tree.update_tree_probabilities()
+        return tree
+
+
+########################################################################
 class GreedyPlayer(Player):
     """ A player who has the higher winning probability in the game.
     Instance Attributes:
@@ -27,13 +87,13 @@ class GreedyPlayer(Player):
     def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
         Player.__init__(self, candidates, questions, 'GreedyPlayer')
 
-    def make_guesses(self, game: GuessWho) -> str:
+    def make_guesses(self) -> str:
         """ The player makes a guess of the name of the opponent's spy at the end of the game."""
 
         for name in self.candidates:
             return name
 
-    def ask_questions(self, game: GuessWho) -> str:
+    def ask_questions(self) -> str:
         """ The player asks question about the characterstics of the spy based on the current state of the game. The
         method mutates questions and candidates by removing the question and candodate that the player
         has already chosen.
@@ -54,6 +114,8 @@ class GreedyPlayer(Player):
         min_index = scores.index(min_score)
         question = self.questions[min_index]
         self.eliminate_question(question)
+        print(f'greedy player q: {question}')
+        print(f'greedy player left q: {self.questions}')
         return question
 
 
@@ -65,7 +127,7 @@ class RandomPlayer(Player):
     def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
         Player.__init__(self, candidates, questions, 'RandomPlayer')
 
-    def make_guesses(self, game: GuessWho) -> str:
+    def make_guesses(self) -> str:
         """ The player makes a guess of the name of the opponent's spy at the last round of the game.
         Precondition:
             - len(self.candidates) == 1
@@ -73,13 +135,15 @@ class RandomPlayer(Player):
         for name in self.candidates:
             return name
 
-    def ask_questions(self, game: GuessWho) -> str:
+    def ask_questions(self) -> str:
         """ A player randomly asks questions based on the current state of game.
          Preconditions:
             - game._whose_turn() == self.n
         """
         question = random.choice(self.questions)
         self.eliminate_question(question)
+        print(f'random player q: {question}')
+        print(f'random player left q: {self.questions}')
         return question
 
 
@@ -90,7 +154,7 @@ class PoorPlayer(Player):
     def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
         Player.__init__(self, candidates, questions, 'PoorPlayer')
 
-    def make_guesses(self, game: GuessWho) -> str:
+    def make_guesses(self) -> str:
         """ The player makes a guess of the name of the opponent's spy at the last round of the game.
         Precondition:
             - len(self.candidates) == 1
@@ -98,7 +162,7 @@ class PoorPlayer(Player):
         for name in self.candidates:
             return name
 
-    def ask_questions(self, game: GuessWho) -> str:
+    def ask_questions(self) -> str:
         """ A player randomly asks questions based on the current state of game.
          Preconditions:
             - game._whose_turn() == self.n
@@ -118,6 +182,8 @@ class PoorPlayer(Player):
         max_index = scores.index(max_score)
         question = self.questions[max_index]
         self.eliminate_question(question)
+        print(f'poor player q: {question}')
+        print(f'poor player left q: {self.questions}')
         return question
 
 
@@ -143,7 +209,7 @@ def plot_winner_statistics(result1: dict[str, list[int]], player1: str, player2:
     ax1.set_ylabel('results (0 = lost) (1 = won)')
     plt.show()
 
-    
+
 def plot_num_games_statistics(result2: dict[str, list[int]]) -> None:
     """ Plot the number of questions that each player asks in each game
 
@@ -176,17 +242,17 @@ def run_game(players: list[Player], candidates: dict[str, dict[str, str]]) -> di
     p1_question = player1.questions
     p2_question = game.players[2].questions
     while len(player1.candidates) != 1 and len(player2.candidates) != 1 and p1_question != [] and p2_question != []:
-        question1 = player1.ask_questions(game)
+        question1 = player1.ask_questions()
         answer1 = game.return_answer(question1, 2)
         player1.eliminate_candidates(question1, answer1)
-        question2 = player2.ask_questions(game)
+        question2 = player2.ask_questions()
         answer2 = game.return_answer(question2, 1)
         player2.eliminate_candidates(question2, answer2)
         single_result['num_questions'] += 1
 
-    guess1 = player1.make_guesses(game)
-    guess2 = player2.make_guesses(game)
-    winner = game.get_winner(guess1, guess2)
+    guess1 = player1.make_guesses()
+    guess2 = player2.make_guesses()
+    winner = game.get_winner()
     single_result['winner'] = winner
 
     return single_result
@@ -252,9 +318,12 @@ if __name__ == '__main__':
     candidates2 = candidates.copy()
     questions = guess_who.generate_all_possible_questions('data/questions.csv')
     player1 = GreedyPlayer(candidates, questions)
-    player2 = PoorPlayer(candidates1, questions)
+    player2 = PoorPlayer(candidates1, questions.copy())
     player1.select_spy()
     player2.select_spy()
-    # print(run_game([player1, player2], candidates2))
+    game = guess_who.GuessWho([player1, player2], candidates2)
+    # # print(run_game([player1, player2], candidates2))
+    #
+    # print(run_games(100, [player1, player2], 12, 'data/questions.csv', True, True))
 
-    print(run_games(100, [player1, player2], 12, 'data/questions.csv', True, True))
+    print(generate_complete_game_tree(game_tree.STARTING_MOVE, game, 7))

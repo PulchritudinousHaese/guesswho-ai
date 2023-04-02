@@ -67,11 +67,6 @@ class GameTree:
     def _printable(self, depth: int) -> str:
         """Return an indented string representation of this tree.
 
-        The indentation level is specified by the <depth> parameter.
-
-        You MAY change the implementation of this method (e.g. to display different instance attributes)
-        as you work on this assignment.
-
         Preconditions:
             - depth >= 0
         """
@@ -103,7 +98,7 @@ class GameTree:
 
         self._update_win_probability()
 
-    def sequence_in_tree(self, moves: list[str | tuple[str, ...]]) -> bool:
+    def sequence_in_tree(self, moves: list[str]) -> bool:
         """Return wheter the move sequence is already in the tree."""
         moves_copy = moves.copy()
         if not moves:
@@ -115,7 +110,7 @@ class GameTree:
             subtree = self.find_subtree_by_move(move)
             return subtree.sequence_in_tree(moves_copy)
 
-    def next_moves(self, moves: list[str | tuple[str, ...]], probability: Optional[float] = 0.0) -> None:
+    def next_moves(self, moves: list[str], probability: Optional[float] = 0.0) -> None:
         """Helper Function.
         Recursively adds next moves to the GameTree assuming this version of events never occured before.
         """
@@ -135,7 +130,8 @@ class GameTree:
         """Recalculate the guesser win probability of this tree.
 
         Probability is updated based on these metrics:
-        -
+        - If it is a leaf: Do not touch
+        - If it has subtrees: Take the average of the subtree probabiltiies
         """
         if not self.get_subtrees():
             return

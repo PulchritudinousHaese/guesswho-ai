@@ -70,6 +70,77 @@ def generate_complete_game_tree(root_move: str | game_tree.STARTING_MOVE, game: 
         return tree
 
 
+class ExploringPlayer(Player):
+    """A player that sometimes plays greedily and sometimes plays randomly."""
+    _game_tree: Optional[game_tree.GameTree]
+    _exploration_probability: float
+
+    def __init__(self, game_tree: game_tree.GameTree, exploration_probabilty: float) -> None:
+        """Initialize the Player."""
+        Player.__init__(self, candidates, questions, 'ExploringPlayer')
+        self._game_tree = game_tree
+        self._exploration_probability = exploration_probabilty
+
+    def make_guesses(self, game: GuessWho) -> str:
+        """ Make a guess given the current game. """
+        possible_questions = self.questions
+
+        if len(game.process) > 0 and self._game_tree is not None:
+            curr_status = game.process[-1]
+            if not self._game_tree.get_subtrees():
+                self._game_tree = None
+            else:
+                self._game_tree = self._game_tree.find_subtree_by_move(curr_status)
+
+        if self._game_tree is None or len(self._game_tree.get_subtrees()) == 0:
+            return random.choice(possible_questions)
+        else:
+            x = random.random()
+            if x < self._exploration_probability:
+                move = random.choice(possible_questions)
+                self._game_tree = self._game_tree.find_subtree_by_move(move)
+                return move
+
+            else:
+                subtree = self._game_tree.get_subtrees()
+                move = max(subtree, key=lambda s_tree: s_tree.win_probability).move
+                self._game_tree = self._game_tree.find_subtree_by_move(move)
+                return move
+
+
+def run_learning_algorithm(file: str, max_guesses: int, probabilities: list[float],
+                         show_stats: bool = True) -> game_tree.GameTree:
+
+    results = {}
+    results['num_game'] = []
+    results['ExploringPlayer'] = []
+    results['RandomPlayer'] = []
+    n = 0
+    tree = game_tree.GameTree()
+    can = Guess_who.create_candidates(file, max_guesses)
+    quest = Guess_who.generate_all_possible_questions(file)
+
+
+    for probability in probabilities:
+        p1 = ExploringPlayer(tree, probability)
+        p2 = RandomPlayer(can, quest)
+        game = run_game([p1, p2], candidates)
+
+        if game == 'ExploringPlyaer':
+            results['ExploringPlayer'].append(1)
+            results['RandomPlayer'].append(0)
+            tree.insert_move_sequence(game.process, 1.0)
+        else:
+            results['ExploringPlayer'].append(0)
+            results['RandomPlayer'].append(1)
+            tree.insert_move_sequence(game.process)
+        n += 1
+        results['num_game'].append(n)
+        
+    if show_stats:
+        plot_winner_statistics(results, 'ExploringPlayer', 'RandomPlayer')
+
+
 ########################################################################
 class GreedyPlayer(Player):
     """ A player who has the higher winning probability in the game.

@@ -128,7 +128,9 @@ class GuessWho:
 
     def whose_turn(self) -> int:
         """ return it's which player's turn to make a guess in this round of game"""
-        if len(self.process) % 2 == 0:
+        if len(self.process) == 0:
+            return 1           
+        elif len(self.process) % 2 == 0:
             return 2
         else:
             return 1

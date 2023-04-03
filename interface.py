@@ -165,7 +165,7 @@ def disable_all() -> None:
 
 
 def enable_all() -> None:
-    """Disables all buttons on the main board."""
+    """Enables all buttons on the main board."""
     for b in QUESTION_FRAME_OBJECTS['buttons']:
         b.config(state=NORMAL)
     QUESTION_FRAME_OBJECTS['questionbutton'].config(state=DISABLED)

@@ -7,6 +7,8 @@ artifical_intelligence is provided to play against as an opponent and the player
 may choose which opponent to play against.
 
 This file also contins the main function to run games and test performaces between AIs.
+
+This file is Copyright (c) 2023 Annie Wang, Mikhail Skazhenyuk, Xinyuan Gu, Ximei Lin.
 """
 from __future__ import annotations
 

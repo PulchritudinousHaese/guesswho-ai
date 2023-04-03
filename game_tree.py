@@ -23,10 +23,8 @@ class GameTree:
     """
     question: str
     win_probability: Optional[float] = 0.0
-
-    # Private Instance Attributes:
-    #  - _subtrees:
-    #      Following step along the path (question/guess)
+    player1_win_probability = 0.0
+    player2_win_probability = 0.0
     _subtrees: dict[str, GameTree]
 
     def __init__(self, question: str = STARTING_MOVE,

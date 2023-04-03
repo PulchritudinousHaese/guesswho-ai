@@ -37,7 +37,6 @@ def generate_complete_game_tree(root_move: str | game_tree.STARTING_MOVE, game: 
     """
     tree = game_tree.GameTree(root_move)
     if d == 0 or game.get_winner() is not None:
-        # print(f'winner{game.get_winner()}')
         if game.get_winner() == game.players[1].name and d % 2 != 0:
             tree.player1_win_probability = 1.0
             return tree
@@ -85,7 +84,7 @@ def generate_complete_game_tree(root_move: str | game_tree.STARTING_MOVE, game: 
 ########################################################################
 class CrazyPlayer(Player):
     """ This player uses a decision tree that has been created, and picks the question leading to the path
-    with the highest winning probability. The decision tree has depth 7. If self.game_tree is none, CrazyPlayer
+    with the highest winning probability. The decision tree has depth 10. If self.game_tree is none, CrazyPlayer
     behaves just like GreedyPlayer.
     Instance Attributes:
     - name: name of this type of player in the game.
@@ -380,7 +379,7 @@ def run_games(num: int, players: list[Player], num_cha: int, file: csv, plot: bo
 
 def run_crazy(num: int, pla: Player, n: int, f: csv, plot: bool, p: bool = False) -> Optional[str]:
     """ Run GuessWho num timesRun GuessWho num times between CrazyPlayer and any given player in pla.
-        CrazyPlayer follows a gametree of depth d.
+        CrazyPlayer follows a gametree of depth 13.
 
         The function returns the results of each game. Parameter plot determines if the user wants to plot the game
         results and number of questions asked in each game. CrazyPlayer must be put in as the first player in the list.
@@ -440,7 +439,7 @@ def generate_tree_each_game(candidates: dict, questions: list[str], players: lis
     t_player2.spy = players[1].spy
     t_player2.name = 'RandomPlayer1'
     t_game = guess_who.GuessWho([t_player1, t_player2], candidates.copy())
-    tree = generate_complete_game_tree(game_tree.STARTING_MOVE, t_game, 6)
+    tree = generate_complete_game_tree(game_tree.STARTING_MOVE, t_game, 10)
     return tree
 
 

@@ -389,6 +389,61 @@ def run_games(num: int, players: list[Player], num_cha: int, file: csv, plot: bo
         wins_1 = game_sta[pl1.name]
         wins_2 = game_sta[pl2.name]
         return f'[winning_probability:{pl1.name}: {(wins_1 / num) * 100}%, {pl2.name}: {(wins_2 / num) * 100}%]'
+   
+  
+  def run_crazy(num: int, pla: Player, n: int, f: csv, plot: bool, p: bool = False) -> Optional[str]:
+    """ Run GuessWho num timesRun GuessWho num times between CrazyPlayer and any given player in pla.
+        CrazyPlayer follows a gametree of depth d.
+
+        The function returns the results of each game. Parameter plot determines if the user wants to plot the game
+        results and number of questions asked in each game. CrazyPlayer must be put in as the first player in the list.
+
+        Optional Parameter:
+        - p: determines if the user wants to print out the winning probability of each player, and the number of
+        questions asked by each player in every round.
+        Preconditions:
+        - file is a non-empty file with questions and answers related to characteristics of each character
+        at each line
+        - players[0].name == 'CrazyPlayer'
+    """
+    default = [0] * num
+    default1 = default.copy()
+    results = {'num_games': [n for n in range(1, num + 1)], 'CrazyPlayer': default, pla.name: default1}
+    num_q = {'num_games': [n for n in range(1, num + 1)], 'num_questions': []}
+    game_sta = {'CrazyPlayer': 0, pla.name: 0}
+    for i in range(0, num):
+        print(f'name: {i}')
+        can = guess_who.create_candidates(f, n)
+        question = guess_who.generate_all_possible_questions(f)
+        pla.candidates = can.copy()
+        pla.questions = question.copy()
+        pla.select_spy()
+        crazy_player = CrazyPlayer(can.copy(), question)
+        crazy_player.select_spy()
+        t_player1 = RandomPlayer(can.copy(), question.copy())
+        t_player2 = RandomPlayer(can.copy(), question.copy())
+        t_player1.spy = crazy_player.spy
+        t_player2.spy = pla.spy
+        t_player2.name = 'RandomPlayer1'
+        t_game = guess_who.GuessWho([t_player1, t_player2], can.copy())
+        tree = generate_complete_game_tree(game_tree.STARTING_MOVE, t_game, 6)
+        # Generate a decision tree by playing games between two RandomPlayer.
+        crazy_player.insert_tree(tree)
+        crazy_player.select_spy()
+        result = run_game([crazy_player, pla], can.copy())
+        if result['winner'] == 'CrazyPlayer' or result['winner'] == pla.name:
+            game_sta[result['winner']] += 1
+            results[result['winner']][i] = 1
+        num_q['num_questions'].append(result['num_questions'])
+
+    if plot:
+        plot_winner_statistics(results, 'CrazyPlayer', pla.name)
+        plot_num_games_statistics(num_q)
+
+    if p:
+        wins_1 = game_sta['CrazyPlayer']
+        wins_2 = game_sta[pla.name]
+        return f'[winning_probability: CrazyPlayer: {(wins_1 / num) * 100}%, {pla.name}: {(wins_2 / num) * 100}%]'
 
 
 if __name__ == '__main__':

@@ -5,6 +5,8 @@ Follows characteristics outlined in:
 https://chalkdustmagazine.com/blog/cracking-guess-board-game/
 
 Which have an optimal GuessWho winning strategy.
+
+This file is Copyright (c) 2023 Annie Wang, Mikhail Skazhenyuk, Xinyuan Gu, Ximei Lin.
 """
 
 HAIRPARTITION = 'A'

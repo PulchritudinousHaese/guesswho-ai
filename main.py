@@ -37,9 +37,9 @@ if __name__ == "__main__":
 #  Sample call between GreedyPlayer and PoorPlayer.
 ########################
     # You may change the first parameter to determine how many games to run.
-    player1 = GreedyPlayer(candidates, questions.copy())
-    player2 = PoorPlayer(candidates1, questions.copy())
-    print(run_games(100, [player1, player2], 12, 'data/questions.csv', True, True))
+#     player1 = GreedyPlayer(candidates, questions.copy())
+#     player2 = PoorPlayer(candidates1, questions.copy())
+#     print(run_games(100, [player1, player2], 12, 'data/questions.csv', True, True))
     # NOTE: You can see GreedyPlayer has obviously better performance.
 
 ########################
@@ -57,9 +57,9 @@ if __name__ == "__main__":
 #  Sample call between PoorPlayer and CrazyPlayer.
 ########################
     # NOTE: we only use a small number of characters since it takes long to generate a complete GameTree.
-    candidates2 = guess_who.create_candidates('data/questions.csv', 8)
-    player1 = PoorPlayer(candidates1.copy(), questions.copy())
-    print(run_crazy(100, player1, 8, 'data/questions.csv', True, True))
+#     candidates2 = guess_who.create_candidates('data/questions.csv', 8)
+#     player1 = PoorPlayer(candidates1.copy(), questions.copy())
+#     print(run_crazy(100, player1, 8, 'data/questions.csv', True, True))
 
     # NOTE: You should notive that CrazyPlayer has significantly better performances than PoorPlayer, and the
     # difference is (mostly) bigger than that between GreedyPlayer and PoorPlayer.

@@ -18,8 +18,7 @@ from tkinter import *
 import guess_who as GW
 from guess_who import Player
 
-import artificial_intelligence as AI
-from artificial_intelligence import RandomPlayer, GreedyPlayer, PoorPlayer
+from artificial_intelligence import Player, RandomPlayer, GreedyPlayer, PoorPlayer, run_games, run_crazy
 
 import interface as IF
 
@@ -27,14 +26,16 @@ GAME_SETTINGS = {'question': ''}
 
 
 ###########################################################
-# main function to run games and test performances between the GuessWho AIs that we've defined.
+# Run GuessWho User Interface
 ###########################################################
 
 if __name__ == "__main__":
     IF.initiate()
 
+##########################################################
+#  Test Performances Between the GuessWho AIs We've defined.
+##########################################################
 if __name__ == '__main__':
-    pass
     # Define data to initialize two players
     candidates = guess_who.create_candidates('data/questions.csv', 12)      # with 12 characters in each game
     candidates1 = candidates.copy()                                          # with 12 characters in each game
@@ -43,21 +44,21 @@ if __name__ == '__main__':
 #  Sample call between GreedyPlayer and PoorPlayer.
 ########################
     # You may change the first parameter to determine how many games to run.
-    # player1 = GreedyPlayer(candidates, questions)
-    # player2 = PoorPlayer(candidates1, questions)
+    # player1 = GreedyPlayer(candidates, questions.copy())
+    # player2 = PoorPlayer(candidates1, questions.copy())
     # print(run_games(100, [player1, player2], 12, 'data/questions.csv', True, True))
-    """NOTE: You can see GreedyPlayer has obviously better performance."""
+    # NOTE: You can see GreedyPlayer has obviously better performance.
 
 ########################
 #  Sample call between GreedyPlayer and RandomPlayer.
 ########################
-    # player1 = GreedyPlayer(candidates, questions)
-    # player2 = RandomPlayer(candidates1, questions)
-    # print(run_games(100, [player1, player2], 12, 'data/questions.csv', True, True))
+    player1 = GreedyPlayer(candidates, questions.copy())
+    player2 = RandomPlayer(candidates1, questions.copy())
+    print(run_games(100, [player1, player2], 12, 'data/questions.csv', True, True))
 
-    """NOTE:You should notive a more nuanced difference between performance of these two players compared to
-     that between PoorPlayer and GreedyPlayer. Sometimes GreedyPlayer and RandoPlayer may even have the same
-     winning probability!"""
+    # NOTE:You should notive a more nuanced difference between performance of these two players compared to
+    # that between PoorPlayer and GreedyPlayer. Sometimes GreedyPlayer and RandoPlayer may even have the same
+    # winning probability!
 
 ########################
 #  Sample call between PoorPlayer and CrazyPlayer.
@@ -66,15 +67,16 @@ if __name__ == '__main__':
 #     candidates2 = guess_who.create_candidates('data/questions.csv', 8)
 #     candidates2 = candidates2.copy()
 #     questions1 = guess_who.generate_all_possible_questions('data/questions.csv')
-#     player1 = PoorPlayer(candidates, questions)
+#     player1 = PoorPlayer(candidates.copy(), questions.copy())
 #     print(run_crazy(25, player1, 8, 'data/questions.csv', True, True))
 
-#     """ NOTE: You should notive that CrazyPlayer has significantly better performances than PoorPlayer, and the
-#      difference is (mostly) bigger than that between GreedyPlayer and PoorPlayer. Run it for multiple times
-#      you would find CrazyPlayer doesn't have the same performances in each game(there are times when its winning rate
-#      is 90+ % but sometimes it's 70+%"""
-    # import python_ta
+    # We don't run this game too many times; otherwise the running time is too long.
+    # NOTE: You should notive that CrazyPlayer has significantly better performances than PoorPlayer, and the
+    # difference is (mostly) bigger than that between GreedyPlayer and PoorPlayer.
+    # However, run it for multiple times you would find CrazyPlayer doesn't have the same performances
+    # in each game(there are times when its winning rate is 90+ % but sometimes it's 70+%
     #
+    # import python_ta
     # python_ta.check_all(config={
     #     'max-line-length': 120,
     #     'extra-imports': ['tkinter', 'guess_who', 'features', 'artificial_intelligence', 'csv', 'interface'],
@@ -89,3 +91,4 @@ if __name__ == '__main__':
     #                 ],
     #     'allowed-io': []
     # })
+

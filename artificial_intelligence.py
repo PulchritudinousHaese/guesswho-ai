@@ -296,7 +296,7 @@ def plot_num_games_statistics(result2: dict[str, list[int]]) -> None:
     df = pd.DataFrame(result2)
     ax2 = df.plot(kind='scatter', x='num_games', y='num_questions', color='b')
     ax2.set_xlabel('number_of_games')
-    ax2.set_ylabel('number_questions_each_game')
+    ax2.set_ylabel('number_of_rounds')
     plt.show()
 
 

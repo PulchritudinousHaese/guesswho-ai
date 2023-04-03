@@ -469,7 +469,7 @@ def run_games(num: int, players: list[Player], num_cha: int, file: csv, plot: bo
         return f'[winning_probability:{pl1.name}: {(wins_1 / num) * 100}%, {pl2.name}: {(wins_2 / num) * 100}%]'
    
   
-  def run_crazy(num: int, pla: Player, n: int, f: csv, plot: bool, p: bool = False) -> Optional[str]:
+def run_crazy(num: int, pla: Player, n: int, f: csv, plot: bool, p: bool = False) -> Optional[str]:
     """ Run GuessWho num timesRun GuessWho num times between CrazyPlayer and any given player in pla.
         CrazyPlayer follows a gametree of depth d.
 

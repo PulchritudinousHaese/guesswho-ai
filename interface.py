@@ -960,7 +960,7 @@ def create_question_frame() -> None:
 
     buttons = []
     QUESTION_FRAME_OBJECTS['frame'] = LabelFrame(FRAME, text="Question Maker", font='Helvetica 16 bold',
-                                                 width=600, height=200)
+                                                 width=500, height=200)
     question_frame = QUESTION_FRAME_OBJECTS['frame']
     curr_feature = 0
 
@@ -987,13 +987,13 @@ def create_question_frame() -> None:
     QUESTION_FRAME_OBJECTS['label'] = Label(question_frame, text="Choose Question", font='Helvetica 8 bold')
     QUESTION_FRAME_OBJECTS['questionbutton'] = Button(question_frame, text="Ask Question", state=DISABLED)
 
-    QUESTION_FRAME_OBJECTS['clearbutton'].grid(row=2, column=6, padx=5, pady=5)
-    QUESTION_FRAME_OBJECTS['label'].grid(row=0, column=6, padx=10, pady=5)
-    QUESTION_FRAME_OBJECTS['questionbutton'].grid(row=1, column=6, padx=10, pady=5)
+    QUESTION_FRAME_OBJECTS['clearbutton'].grid(row=4, column=4, columnspan=2, padx=5, pady=5)
+    QUESTION_FRAME_OBJECTS['label'].grid(row=4, column=0, columnspan=2, padx=10, pady=5)
+    QUESTION_FRAME_OBJECTS['questionbutton'].grid(row=4, column=2, columnspan=2, padx=10, pady=5)
 
     QUESTION_FRAME_OBJECTS['buttons'] = buttons
 
-    question_frame.grid(row=1, column=3, columnspan=3, rowspan=2, padx=0, pady=5)
+    question_frame.grid(row=1, column=2, columnspan=4, rowspan=2, padx=0, pady=5)
     question_frame.grid_propagate(0)
 
 

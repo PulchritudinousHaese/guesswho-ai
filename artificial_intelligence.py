@@ -18,23 +18,6 @@ from typing import Optional
 ########################################################################
 # GameTree
 #############
-def generate_complete_game_tree(root_move: str | game_tree.STARTING_MOVE, game: guess_who.GuessWho,
-                                d: int) -> game_tree.GameTree:
-    """Generate a complete game tree of depth d for all valid moves from the current game_state.
-
-    For the returned GameTree:
-        - Its root move is root_move.
-        - It contains all possible move sequences of length <= d from game_state.
-        - If d == 0, a size-one GameTree is returned.
-
-    Note that some paths down the tree may have length < d, because they result in a game state
-    with a winner in fewer than d moves. Concretely, if game_state.get_winner() is not None,
-    then return just a size-one GameTree containing the root move.
-
-    Preconditions:
-        - d >= 0
-    """
-    
     
 def generate_complete_game_tree(root_move: str | game_tree.STARTING_MOVE, game: guess_who.GuessWho,
                                 d: int) -> game_tree.GameTree:

@@ -37,7 +37,8 @@ if __name__ == "__main__":
 ##########################################################
 if __name__ == '__main__':
     # Define data to initialize two players
-    candidates = guess_who.create_candidates('data/questions.csv', 12)      # with 12 characters in each game
+    candidates = guess_who.create_candidates('data/questions.csv', 12)  # with 12 characters in each game
+    candidates1 = candidates.copy()
     questions = guess_who.generate_all_possible_questions('data/questions.csv')
 ########################
 #  Sample call between GreedyPlayer and PoorPlayer.

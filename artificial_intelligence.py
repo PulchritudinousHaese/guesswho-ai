@@ -451,3 +451,4 @@ def generate_tree_each_game(candidates: dict, questions: list[str], players: lis
 #     #     'allowed-io': ['open', 'f-strings', 'print'],  # the names (strs) of functions that call print/open/input
 #     #     'max-line-length': 120
 #     # })
+

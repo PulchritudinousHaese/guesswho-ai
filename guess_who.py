@@ -25,8 +25,6 @@ import tkinter as tk
 
 def load_person(person_tuple: tuple[str]) -> Person:
     """Returns a Person from the defined string of characteristics.
-    Preconditions:
-    - len(person_tuple) == 9
     """
     features_so_far = set()
     for p in person_tuple[1:]:

@@ -34,41 +34,67 @@ def generate_complete_game_tree(root_move: str | game_tree.STARTING_MOVE, game: 
     Preconditions:
         - d >= 0
     """
+def generate_complete_game_tree(root_move: str | game_tree.STARTING_MOVE, game: guess_who.GuessWho,
+                                d: int) -> game_tree.GameTree:
+    """Generate a complete game tree of depth d for all valid paths the player can take from the current GuessWho Game.
+
+    For the returned GameTree:
+        - Its root move is a question.
+        - It contains all possible move sequences of length <= d from game_state.
+        - If d == 0, a size-one GameTree is returned.
+
+    Note that some paths down the tree may have length < d, because they result in a game state
+    with a winner in fewer than d moves. Concretely, if game_state.get_winner() is not None,
+    then return just a size-one GameTree containing the root move.
+
+    Preconditions:
+        - d >= 0
+        - root_move == game_tree.STARTING_MOVE or root_move is a valid move
+
+    """
     tree = game_tree.GameTree(root_move)
     if d == 0 or game.get_winner() is not None:
-        if game.get_winner() == game.players[1].name:
+        # print(f'winner{game.get_winner()}')
+        if game.get_winner() == game.players[1].name and d % 2 != 0:
             tree.player1_win_probability = 1.0
             return tree
-        elif game.get_winner() == game.players[2].name:
+        elif game.get_winner() == game.players[2].name and d % 2 == 0:
             tree.player2_win_probability = 1.0
             return tree
         else:
-            tree.win_probability = 0.0
+            tree.player1_win_probability = 0.0
+            tree.player2_win_probability = 0.0
             return tree
 
     elif game.whose_turn() == 1:
-        possible_questions = game.players[1].questions
-        for question in possible_questions:
-            game.players[1].questions.remove(question)
-            answer = game.return_answer(question, 2)
+        questions_copy1 = game.players[1].questions.copy()
+        candidates_copy1 = game.players[1].candidates.copy()
+        for question in questions_copy1:
+            game.players[1].eliminate_question(question)
+            answer = game.return_answer(question, 1)
+            game.copy_and_record_player_move(question)
             game.players[1].eliminate_candidates(question, answer)
             new_state = game.copy_and_record_player_move(question)
             sub = generate_complete_game_tree(question, new_state, d - 1)
             tree.add_subtree(sub)
-            tree.update_tree_probabilities()
+            game.players[1].questions = questions_copy1
+            game.players[1].candidates = candidates_copy1
         return tree
     else:
-        possible_questions = game.players[2].questions
-        for question in possible_questions:
-            game.players[2].questions.remove(question)
+        questions_copy2 = game.players[2].questions.copy()
+        candidates_copy2 = game.players[2].candidates.copy()
+        for question in questions_copy2:
+            game.players[2].eliminate_question(question)
             answer = game.return_answer(question, 1)
+            game.copy_and_record_player_move(question)
             game.players[2].eliminate_candidates(question, answer)
             new_state = game.copy_and_record_player_move(question)
             sub = generate_complete_game_tree(question, new_state, d - 1)
             tree.add_subtree(sub)
-            tree.update_tree_probabilities()
+            game.players[2].questions = questions_copy2
+            game.players[2].candidates = candidates_copy2
+        tree.update_tree_probabilities()
         return tree
-
 
 class ExploringPlayer(Player):
     """A player that sometimes plays greedily and sometimes plays randomly."""

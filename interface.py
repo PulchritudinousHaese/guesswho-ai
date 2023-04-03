@@ -9,7 +9,10 @@ from tkinter import *
 from guess_who import *
 from features import *
 
+import artificial_intelligence as AI
+
 ########################################################################################################################
+GAME_SETTINGS = {}
 FRAME = None
 GAME_FEATURES = {}
 GUESS_FRAME_OBJECTS = {}
@@ -46,6 +49,274 @@ CHARACTERISTICS = [HAIRPARTITION,
 ########################################################################################################################
 
 
+class HumanPlayer(Player):
+    """The class representing the human player."""
+
+    def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]) -> None:
+        Player.__init__(self, candidates, questions, 'HumanPlayer')
+
+    def make_guesses(self, game: GuessWho) -> str:
+        """Make a guess at the enemy's spy."""
+        return GUESS_FRAME_OBJECTS['label']['text']
+
+    def ask_questions(self, game: GuessWho) -> str:
+        """Asks a question based on which question the player selected."""
+        return GAME_SETTINGS['question'] + '?'
+
+
+########################################################################################################################
+# MAIN PART TO RUN THE GUI BACKEND #
+########################################################################################################################
+
+
+def make_a_guess() -> None:
+    """Makes the current guess for the HumanPlayer.
+    Clears chat box.
+    Runs the guess through the game.
+    Possible tie covered.
+    Disables all buttons.
+    """
+    clear_chat()
+    p1 = GAME_SETTINGS['players'][0]
+    q1 = p1.make_guesses(GAME_SETTINGS['game'])
+
+    g2 = GAME_SETTINGS['players'][1].make_guesses(GAME_SETTINGS['game'])
+    if GAME_SETTINGS['players'][1].spy == q1:
+        insert_conversation('You are correct!\n\nComputer made \nthe final guess:\n' + g2 + '\n')
+
+        if g2 == GAME_SETTINGS['players'][0].spy:
+            insert_conversation('The Computer \nguessed correctly!\nIt is a tie\n')
+
+        else:
+            insert_conversation('The Computer \nguessed incorrectly!\nYou win!\n')
+
+    else:
+        # print(GAME_SETTINGS['players'][1].spy)
+        insert_conversation('You are incorrect!\n\nComputer made \nthe final guess:\n' + g2 + '\n')
+        if g2 == GAME_SETTINGS['players'][0].spy:
+            insert_conversation('The Computer \nguessed correctly!\nYou lose!\n')
+
+        else:
+            insert_conversation('The Computer \nguessed incorrectly!\nIt is a tie!\n')
+
+    disable_all()
+    disable_guessing()
+
+
+def make_a_final_guess() -> None:
+    """Makes the current final guess for the HumanPlayer. This is the guess where the computer has already guessed."""
+    p1 = GAME_SETTINGS['players'][0]
+    q1 = p1.make_guesses(GAME_SETTINGS['game'])
+
+    if GAME_SETTINGS['players'][1].spy == q1:
+        insert_conversation('You are correct!\nIt is a tie!')
+    else:
+        insert_conversation('You lost!\n')
+
+    insert_conversation('''Let's play again!\nClick menu\nto reset''')
+    disable_all()
+    disable_guessing()
+
+
+def make_a_question() -> None:
+    """Makes a question for the HumanPlayer"""
+    clear_chat()
+    p1 = GAME_SETTINGS['players'][0]
+    q1 = p1.ask_questions(GAME_SETTINGS['game'])
+    insert_conversation('You asked if the \ncomputer has:\n'
+                        + feature_to_text(GAME_SETTINGS['question'])
+                        + '\n')
+
+    a1 = GAME_SETTINGS['game'].return_answer(q1, 2)  # Y or N
+
+    if a1 == 'Y':
+        insert_conversation('Yes!\nMy spy has the\nfeature:\n'
+                            + feature_to_text(GAME_SETTINGS['question']) + '\n')
+
+        for face in GAME_FEATURES['faces']:
+            if GAME_SETTINGS['question'] not in face.chars:
+                face.up = False
+                face.cover()
+
+    else:
+        insert_conversation('No!\nMy spy does not have\nthe feature:\n'
+                            + feature_to_text(GAME_SETTINGS['question']) + '\n')
+
+        for face in GAME_FEATURES['faces']:
+            if GAME_SETTINGS['question'] in face.chars:
+                face.up = False
+                face.cover()
+
+    QUESTION_FRAME_OBJECTS['label']['text'] = 'Choose Quesiton'
+    p1.eliminate_candidates(q1, a1)
+    computer_make_a_question()
+
+
+def disable_all() -> None:
+    """Disables all buttons on the main board. (except menu and exit)"""
+    for b in QUESTION_FRAME_OBJECTS['buttons']:
+        b.config(state=DISABLED)
+    QUESTION_FRAME_OBJECTS['questionbutton'].config(state=DISABLED)
+    QUESTION_FRAME_OBJECTS['clearbutton'].config(state=DISABLED)
+
+    GUESS_FRAME_OBJECTS['guessbutton'].config(state=DISABLED)
+    GUESS_FRAME_OBJECTS['clearbutton'].config(state=DISABLED)
+
+
+def enable_all() -> None:
+    """Disables all buttons on the main board."""
+    for b in QUESTION_FRAME_OBJECTS['buttons']:
+        b.config(state=NORMAL)
+    QUESTION_FRAME_OBJECTS['questionbutton'].config(state=DISABLED)
+    QUESTION_FRAME_OBJECTS['clearbutton'].config(state=NORMAL)
+
+    GUESS_FRAME_OBJECTS['guessbutton'].config(state=DISABLED)
+    GUESS_FRAME_OBJECTS['clearbutton'].config(state=NORMAL)
+
+
+def computer_make_a_guess() -> None:
+    """Makes the computer make its guess and gives the player an option to make their guess."""
+    g2 = GAME_SETTINGS['players'][1].make_guesses(GAME_SETTINGS['game'])
+
+    insert_conversation('You are correct!\nComputer made \nthe final guess:\n' + g2 + '\n')
+    insert_conversation('The Computer \nguessed correctly!\nIt is your turn\nto tie it up!')
+
+    disable_all()
+
+    GUESS_FRAME_OBJECTS['clearbutton'].config(state=NORMAL)
+    GUESS_FRAME_OBJECTS['guessbutton'].config(command=make_a_final_guess)
+    clear_selection()
+
+
+def computer_make_a_question() -> None:
+    """Makes the computer make its question move."""
+    disable_all()
+
+    p2 = GAME_SETTINGS['players'][1]
+
+    if len(p2.candidates) == 1:
+        computer_make_a_guess()
+    else:
+        q2 = p2.ask_questions(GAME_SETTINGS['game'])
+        a2 = GAME_SETTINGS['game'].return_answer(q2, 1)
+        p2.eliminate_candidates(q2, a2)
+        insert_conversation('The computer has \nasked if you have:\n' + feature_to_text(q2[0]) + '\n')
+
+        if a2 == 'Y':
+            insert_conversation('Your spy has this\nattribute!\n')
+        else:
+            insert_conversation('Your spy does not have this attribute!\n')
+        enable_all()
+        clear_selection()
+
+
+def select_question(button: Button) -> None:
+    """Selects a question and stores it from the specific button."""
+    global GAME_SETTINGS
+
+    GAME_SETTINGS['question'] = text_to_feature(button['text'])
+
+    for b in QUESTION_FRAME_OBJECTS['buttons']:
+
+        if b['text'] == button['text']:
+            b.config(state=DISABLED)
+
+        else:
+            b.config(state=NORMAL)
+
+    QUESTION_FRAME_OBJECTS['label'].config(text=button['text'])
+    QUESTION_FRAME_OBJECTS['questionbutton'].config(state=NORMAL)
+
+
+def text_to_player(text: str) -> Player:
+    """Converts the text to the respective player and initializes the object, then returns it.
+    Necessary for selecting a difficulty."""
+    if text == 'GreedyPlayer':
+        return AI.GreedyPlayer(GAME_SETTINGS['candidates'].copy(), GAME_SETTINGS['questions'].copy())
+    elif text == 'RandomPlayer':
+        return AI.RandomPlayer(GAME_SETTINGS['candidates'].copy(), GAME_SETTINGS['questions'].copy())
+    else:
+        return AI.PoorPlayer(GAME_SETTINGS['candidates'].copy(), GAME_SETTINGS['questions'].copy())
+
+
+def update_question_buttons() -> None:
+    """Updates all the question buttons in the button frame to be able to select a question or make a guess."""
+    GAME_FEATURES['menu'].config(command=new_game)
+
+    for button in QUESTION_FRAME_OBJECTS['buttons']:
+        q = text_to_feature(button['text']) + '?'
+
+        if q in GAME_SETTINGS['players'][0].questions:
+            button.config(state=NORMAL, command=lambda b=button: select_question(b))
+
+    GUESS_FRAME_OBJECTS['guessbutton'].config(command=make_a_guess)
+    QUESTION_FRAME_OBJECTS['questionbutton'].config(command=make_a_question)
+
+
+def select_player(difficulty: str) -> None:
+    """Selects the player that will play (AI)"""
+    global GAME_SETTINGS
+
+    player2 = text_to_player(difficulty)  # Finds difficulty
+    player2.select_spy()  # Randomly chooses spy
+
+    # print(player2.spy)  # Enable to guess eaiser
+
+    GAME_SETTINGS['players'].append(player2)
+    clear_frame()
+    summon_main_board()
+
+    spy = name_to_face(GAME_SETTINGS['players'][0].spy)
+    spy.canvas = GAME_FEATURES['spycanvas']
+
+    # Necessary for face to grid properly
+    spy.row = 1
+    spy.col = 0
+    spy.draw_face()
+
+    update_question_buttons()
+    GAME_SETTINGS['game'] = GuessWho(GAME_SETTINGS['players'], GAME_SETTINGS['candidates'])
+
+
+def run_window() -> None:
+    """Runs the main GUI. Give player buttons the select player option in the main menu."""
+    summon_main_menu()
+    for button in GAME_FEATURES['pb']:
+        button.config(command=lambda p=button['text']: select_player(p))
+
+
+def new_game() -> None:
+    """Starts a new game of GuessWho. Frehs start and then run the main window of the game."""
+    GAME_SETTINGS['candidates'] = create_candidates('data/questions.csv', 24)  # 24 people NECESSARY.
+    candidates1 = GAME_SETTINGS['candidates'].copy()
+    GAME_SETTINGS['questions'] = generate_all_possible_questions('data/questions.csv')
+
+    questions1 = GAME_SETTINGS['questions'].copy()
+    player1 = HumanPlayer(candidates1, questions1)
+    player1.select_spy()
+    GAME_SETTINGS['players'] = [player1]
+    run_window()
+
+
+def initiate() -> None:
+    """Runs the main code for the game.
+    Initiate the main frame and winow."""
+    window = Tk()
+    GAME_SETTINGS['window'] = window
+    window.title('GuessWho Game')
+    frame = Frame(window, width=900, height=600)
+    frame.pack(side="top", expand=True, fill="both")
+    frame.pack_propagate(False)
+    set_frame(frame)
+
+    new_game()
+    run_window()
+    window.mainloop()
+
+
+########################################################################################################################
+
+
 def set_frame(frm: Frame) -> None:
     """Changes the global variable frame to the given frame."""
     global FRAME
@@ -61,10 +332,17 @@ def clear_selection() -> None:
 
 def clear_question() -> None:
     """Clears the current question"""
-    QUESTION_FRAME_OBJECTS['label'].config(text='Please Select One')
+    QUESTION_FRAME_OBJECTS['label'].config(text='Choose Question')
     for button in QUESTION_FRAME_OBJECTS['buttons']:
         button.config(state=NORMAL)
     QUESTION_FRAME_OBJECTS['questionbutton'].config(state=DISABLED)
+
+
+def disable_guessing() -> None:
+    """Disables the function of the guessing button at the end of a game round."""
+    GUESS_FRAME_OBJECTS['guessbutton'].config(state=DISABLED)
+    for face in GAME_FEATURES['faces']:
+        unbind_hovering(face)
 
 
 ########################################################################################################################
@@ -457,51 +735,7 @@ def persons_to_faces(persons: list[Person], game_frame: LabelFrame) -> list[Face
     return faces_so_far
 
 
-def create_faces() -> None:
-    """Create Face classes and draw them into game_frame. All of them."""
-    global GAME_FEATURES
-
-    main_menu_labelframe = LabelFrame(
-        FRAME,
-        text="FACES",
-        font=('Helvetica', 16, 'bold')
-    )
-    main_menu_labelframe.grid(row=0, column=2, columnspan=3, padx=5, pady=10)
-
-    persons = load_persons('data/characteristics.csv')
-    assert len(persons) == 24
-
-    faces = persons_to_faces(persons, main_menu_labelframe)
-    GAME_FEATURES['faces'] = faces
-    for face in faces:
-        face.draw_face()
-
-
-def clear_frame() -> None:
-    """Clears the global FRAME.
-
-    Preconditions:
-    - len(frame.winfo_children()) >= 1
-    """
-    for widgets in FRAME.winfo_children():
-        widgets.destroy()
-
-    FRAME.grid_propagate(False)
-
-
-def create_exit() -> None:
-    """Creates the exit button for the main game board. Inserts it."""
-    exit_button = Button(
-        FRAME,
-        text="Exit",
-        width=10,
-        command=exit,
-        bg='red'
-    )
-    exit_button.grid(row=2, column=0, pady=10)
-
-
-def question_to_feature(feature: str) -> str:
+def text_to_feature(feature: str) -> str:
     """Converts the question to the necessary constant."""
     text = ''
 
@@ -553,7 +787,7 @@ def question_to_feature(feature: str) -> str:
     return text
 
 
-def convert_feature_to_text(feature: str) -> str:
+def feature_to_text(feature: str) -> str:
     """Converts the given feature to text."""
     text = ''
 
@@ -605,77 +839,16 @@ def convert_feature_to_text(feature: str) -> str:
     return text
 
 
-def create_question_frame() -> None:
-    """Creates the place to make a final guess.
-    Everything is stored into QUESITON_FRAME_OBJECTS
-    - 'frame': The LabelFrame containing everything.
-    - 'clearbutton': Clears the current question selection.
-    - 'buttons': Contains every quesitons Button object
-    - 'label': Label of the question
-    - 'questionbutton': Supposed to make a quesiton later on."""
-    global QUESTION_FRAME_OBJECTS
+def clear_frame() -> None:
+    """Clears the global FRAME.
 
-    buttons = []
-    QUESTION_FRAME_OBJECTS['frame'] = LabelFrame(FRAME, text="Question Maker", font='Helvetica 16 bold',
-                                                 width=600, height=200)
-    question_frame = QUESTION_FRAME_OBJECTS['frame']
-    curr_feature = 0
+    Preconditions:
+    - len(frame.winfo_children()) >= 1
+    """
+    for widgets in FRAME.winfo_children():
+        widgets.destroy()
 
-    for i in range(3):
-
-        for j in range(6):
-            button = Button(question_frame, text=convert_feature_to_text(CHARACTERISTICS[curr_feature]),
-                            font='Helvetica 8', width=10)
-            button.grid(row=i, column=j, padx=5)
-            buttons.append(button)
-            curr_feature += 1
-
-    for k in range(1, 5):
-        button = Button(question_frame,
-                        text=convert_feature_to_text(CHARACTERISTICS[curr_feature]),
-                        font='Helvetica 8',
-                        width=10)
-
-        button.grid(row=3, column=k, padx=5)
-        curr_feature += 1
-        buttons.append(button)
-
-    QUESTION_FRAME_OBJECTS['clearbutton'] = Button(question_frame, text="Clear Question", command=clear_question)
-    QUESTION_FRAME_OBJECTS['label'] = Label(question_frame, text="Please Select One", font='Helvetica 8 bold')
-    QUESTION_FRAME_OBJECTS['questionbutton'] = Button(question_frame, text="Ask Question", state=DISABLED)
-
-    QUESTION_FRAME_OBJECTS['clearbutton'].grid(row=2, column=6, padx=5, pady=5)
-    QUESTION_FRAME_OBJECTS['label'].grid(row=0, column=6, padx=10, pady=5)
-    QUESTION_FRAME_OBJECTS['questionbutton'].grid(row=1, column=6, padx=10, pady=5)
-
-    QUESTION_FRAME_OBJECTS['buttons'] = buttons
-
-    question_frame.grid(row=1, column=3, columnspan=3, rowspan=2, padx=0, pady=5)
-    question_frame.grid_propagate(0)
-
-
-def create_guess_frame() -> None:
-    """Creates the place to make a final guess.
-    Everything is stored into GUESS_FRAME_OBJECTS
-    - 'frame': The LabelFrame containing everything.
-    - 'clearbutton': Clears the current guess selection.
-    - 'label': Label of the guess
-    - 'guessbutton': Supposed to make a guess later on."""
-    global GUESS_FRAME_OBJECTS
-
-    GUESS_FRAME_OBJECTS['frame'] = LabelFrame(FRAME, text="Guess", font='Helvetica 16 bold')
-    guess_frame = GUESS_FRAME_OBJECTS['frame']
-
-    GUESS_FRAME_OBJECTS['label'] = Label(guess_frame, text="Select a face", font='Helvetica 10 bold')
-
-    GUESS_FRAME_OBJECTS['guessbutton'] = Button(guess_frame, text="Make Guess", state=DISABLED)
-    GUESS_FRAME_OBJECTS['clearbutton'] = Button(guess_frame, text="Clear Selection", command=clear_selection)
-
-    GUESS_FRAME_OBJECTS['label'].pack(padx=10, pady=5)
-    GUESS_FRAME_OBJECTS['guessbutton'].pack(side=LEFT, padx=5, pady=5)
-    GUESS_FRAME_OBJECTS['clearbutton'].pack(side=RIGHT, padx=5, pady=5)
-
-    GUESS_FRAME_OBJECTS['frame'].grid(row=1, column=0, columnspan=2, padx=0, pady=10)
+    FRAME.grid_propagate(False)
 
 
 def create_profiler() -> None:
@@ -705,6 +878,117 @@ def create_profiler() -> None:
     TEXT_BOX.grid(row=2, column=0, columnspan=2, padx=10, pady=14)
 
     profile_frame.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
+
+
+def create_menu_button() -> None:
+    """Creates the button that will take the player back to main menu."""
+    GAME_FEATURES['menu'] = Button(FRAME, text='Menu', width=10)
+    GAME_FEATURES['menu'].grid(row=2, column=1, padx=10, pady=10)
+
+
+def create_exit() -> None:
+    """Creates the exit button for the main game board. Inserts it."""
+    exit_button = Button(
+        FRAME,
+        text="Exit",
+        width=10,
+        command=exit,
+        bg='red'
+    )
+    exit_button.grid(row=2, column=0, pady=10)
+
+
+def create_guess_frame() -> None:
+    """Creates the place to make a final guess.
+    Everything is stored into GUESS_FRAME_OBJECTS
+    - 'frame': The LabelFrame containing everything.
+    - 'clearbutton': Clears the current guess selection.
+    - 'label': Label of the guess
+    - 'guessbutton': Supposed to make a guess later on."""
+    global GUESS_FRAME_OBJECTS
+
+    GUESS_FRAME_OBJECTS['frame'] = LabelFrame(FRAME, text="Guess", font='Helvetica 16 bold')
+    guess_frame = GUESS_FRAME_OBJECTS['frame']
+
+    GUESS_FRAME_OBJECTS['label'] = Label(guess_frame, text="Select a face", font='Helvetica 10 bold')
+
+    GUESS_FRAME_OBJECTS['guessbutton'] = Button(guess_frame, text="Make Guess", state=DISABLED)
+    GUESS_FRAME_OBJECTS['clearbutton'] = Button(guess_frame, text="Clear Selection", command=clear_selection)
+
+    GUESS_FRAME_OBJECTS['label'].pack(padx=10, pady=5)
+    GUESS_FRAME_OBJECTS['guessbutton'].pack(side=LEFT, padx=5, pady=5)
+    GUESS_FRAME_OBJECTS['clearbutton'].pack(side=RIGHT, padx=5, pady=5)
+
+    GUESS_FRAME_OBJECTS['frame'].grid(row=1, column=0, columnspan=2, padx=0, pady=10)
+
+
+def create_faces() -> None:
+    """Create Face classes and draw them into game_frame. All of them."""
+    global GAME_FEATURES
+
+    main_menu_labelframe = LabelFrame(
+        FRAME,
+        text="FACES",
+        font=('Helvetica', 16, 'bold')
+    )
+    main_menu_labelframe.grid(row=0, column=2, columnspan=3, padx=5, pady=10)
+
+    persons = load_persons('data/characteristics.csv')
+    assert len(persons) == 24
+
+    faces = persons_to_faces(persons, main_menu_labelframe)
+    GAME_FEATURES['faces'] = faces
+    for face in faces:
+        face.draw_face()
+
+
+def create_question_frame() -> None:
+    """Creates the place to make a final guess.
+    Everything is stored into QUESITON_FRAME_OBJECTS
+    - 'frame': The LabelFrame containing everything.
+    - 'clearbutton': Clears the current question selection.
+    - 'buttons': Contains every quesitons Button object
+    - 'label': Label of the question
+    - 'questionbutton': Supposed to make a quesiton later on."""
+    global QUESTION_FRAME_OBJECTS
+
+    buttons = []
+    QUESTION_FRAME_OBJECTS['frame'] = LabelFrame(FRAME, text="Question Maker", font='Helvetica 16 bold',
+                                                 width=600, height=200)
+    question_frame = QUESTION_FRAME_OBJECTS['frame']
+    curr_feature = 0
+
+    for i in range(3):
+
+        for j in range(6):
+            button = Button(question_frame, text=feature_to_text(CHARACTERISTICS[curr_feature]),
+                            font='Helvetica 8', width=10)
+            button.grid(row=i, column=j, padx=5)
+            buttons.append(button)
+            curr_feature += 1
+
+    for k in range(1, 5):
+        button = Button(question_frame,
+                        text=feature_to_text(CHARACTERISTICS[curr_feature]),
+                        font='Helvetica 8',
+                        width=10)
+
+        button.grid(row=3, column=k, padx=5)
+        curr_feature += 1
+        buttons.append(button)
+
+    QUESTION_FRAME_OBJECTS['clearbutton'] = Button(question_frame, text="Clear Question", command=clear_question)
+    QUESTION_FRAME_OBJECTS['label'] = Label(question_frame, text="Choose Question", font='Helvetica 8 bold')
+    QUESTION_FRAME_OBJECTS['questionbutton'] = Button(question_frame, text="Ask Question", state=DISABLED)
+
+    QUESTION_FRAME_OBJECTS['clearbutton'].grid(row=2, column=6, padx=5, pady=5)
+    QUESTION_FRAME_OBJECTS['label'].grid(row=0, column=6, padx=10, pady=5)
+    QUESTION_FRAME_OBJECTS['questionbutton'].grid(row=1, column=6, padx=10, pady=5)
+
+    QUESTION_FRAME_OBJECTS['buttons'] = buttons
+
+    question_frame.grid(row=1, column=3, columnspan=3, rowspan=2, padx=0, pady=5)
+    question_frame.grid_propagate(0)
 
 
 def clear_chat() -> None:
@@ -737,12 +1021,6 @@ def create_conversation() -> None:
 
     CONVERSATION_FRAME_OBJECTS['frame'].grid(row=0, column=5, padx=5)
     CONVERSATION_FRAME_OBJECTS['box'].grid(row=0, column=0, padx=10, pady=10)
-
-
-def create_menu_button() -> None:
-    """Creates the button that will take the player back to main menu."""
-    GAME_FEATURES['menu'] = Button(FRAME, text='Menu', width=10)
-    GAME_FEATURES['menu'].grid(row=2, column=1, padx=10, pady=10)
 
 
 def summon_main_board() -> None:

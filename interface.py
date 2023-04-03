@@ -91,7 +91,7 @@ def make_a_guess() -> None:
             insert_conversation('The Computer \nguessed incorrectly!\nYou win!\n')
 
     else:
-        print(GAME_SETTINGS['players'][1].spy)
+        # print(GAME_SETTINGS['players'][1].spy)
         insert_conversation('You are incorrect!\n\nComputer made \nthe final guess:\n' + g2 + '\n')
         if g2 == GAME_SETTINGS['players'][0].spy:
             insert_conversation('The Computer \nguessed correctly!\nYou lose!\n')
@@ -128,7 +128,7 @@ def make_a_question() -> None:
                         + '\n')
 
     a1 = GAME_SETTINGS['game'].return_answer(q1, 2)  # Y or N
-    print(a1, feature_to_text(q1[0]))
+    # print(a1, feature_to_text(q1[0]))
     if a1 == 'Y':
         insert_conversation('Yes!\nMy spy has the\nfeature:\n'
                             + feature_to_text(GAME_SETTINGS['question']) + '\n')

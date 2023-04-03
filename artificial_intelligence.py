@@ -10,7 +10,6 @@ import csv
 import random
 import pandas as pd
 import matplotlib.pyplot as plt
-from python_ta.contracts import check_contracts
 import game_tree
 
 from typing import Optional
@@ -131,7 +130,7 @@ class CrazyPlayer(Player):
         """
         if self.game_tree is not None and len(self.game.process) != 0:
             opponent_move = self.game.process[-1]
-            sub_tree = self.game_tree.find_subtree_by_move(opponent_move)
+            sub_tree = self.game_tree.find_subtree_by_question(opponent_move)
             self.game_tree = sub_tree
         if self.game_tree is not None and len(self.game_tree.get_subtrees()) != 0:
             max_sub = None
@@ -161,7 +160,7 @@ class CrazyPlayer(Player):
 
     def _copy(self) -> CrazyPlayer:
         """Return a copy of this player, used in generating gametree for CrazyPlayer"""
-        new_player = CrazyPlayer(self.candidates, self.questions, self.game_tree, self.game)
+        new_player = CrazyPlayer(self.candidates, self.questions)
         return new_player
 
 
@@ -263,7 +262,7 @@ class PoorPlayer(Player):
 
 #######
 # run games
-#######
+##################################
 def plot_winner_statistics(result1: dict[str, list[int]], player1: str, player2: str) -> None:
     """ Plot the game results from the given list of games and players results. x-axis represents the num_games.
     y-axis shows the winning state of each pleyer (0=lost, 1=won)
@@ -441,25 +440,27 @@ if __name__ == '__main__':
     # (In PyCharm, select the lines below and press Ctrl/Cmd + / to toggle comments.)
     # You can use "Run file in Python Console" to run PythonTA,
     # and then also test your methods manually in the console.
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'max-nested-blocks': 4,
-    #     'extra-imports': ['random', 'a2_adversarial_wordle', 'a2_game_tree'],
-    #     'allowed-io': ['run_learning_algorithm']
-    # })
-    candidates = guess_who.create_candidates('data/questions.csv', 8)
-    #candidates2 = candidates.copy()
-    questions = guess_who.generate_all_possible_questions('data/questions.csv')
-    player1 = PoorPlayer(candidates, questions)
-    #player2 = RandomPlayer(candidates.copy(), questions.copy())
-    print(run_crazy(15, player1, 8, 'data/questions.csv', True, True))
-    # player2.select_spy()
-    # player2.name = 'RandomPlayer1'
-    #game = guess_who.GuessWho([player1, player2], candidates.copy())
-    #  print(run_game([player1, player2], candidates2))
-    #
-    # print(run_games(100, [player1, player2], 12, 'data/questions.csv', True, True))
-    # tree = generate_complete_game_tree(game_tree.STARTING_MOVE, game, 7)
-    # print(tree)
-    # print(len(tree.get_subtrees()))
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'max-nested-blocks': 4,
+        'extra-imports': ['random', 'a2_adversarial_wordle', 'a2_game_tree'],
+        'allowed-io': ['run_learning_algorithm']
+    })
+
+
+    # candidates = guess_who.create_candidates('data/questions.csv', 8)
+    # #candidates2 = candidates.copy()
+    # questions = guess_who.generate_all_possible_questions('data/questions.csv')
+    # player1 = PoorPlayer(candidates, questions)
+    # #player2 = RandomPlayer(candidates.copy(), questions.copy())
+    # print(run_crazy(15, player1, 8, 'data/questions.csv', True, True))
+    # # player2.select_spy()
+    # # player2.name = 'RandomPlayer1'
+    # #game = guess_who.GuessWho([player1, player2], candidates.copy())
+    # #  print(run_game([player1, player2], candidates2))
+    # #
+    # # print(run_games(100, [player1, player2], 12, 'data/questions.csv', True, True))
+    # # tree = generate_complete_game_tree(game_tree.STARTING_MOVE, game, 7)
+    # # print(tree)
+    # # print(len(tree.get_subtrees()))

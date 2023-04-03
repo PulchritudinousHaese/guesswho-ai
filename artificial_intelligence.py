@@ -82,7 +82,7 @@ def generate_complete_game_tree(root_move: str | game_tree.STARTING_MOVE, game: 
         return tree
 
       
- class CrazyPlayer(Player):
+class CrazyPlayer(Player):
     """ This player uses a decision tree that has been created, and picks the question leading to the path
     with the highest winning probability. The decision tree has depth 7. If self.game_tree is none, CrazyPlayer
     behaves just like GreedyPlayer.

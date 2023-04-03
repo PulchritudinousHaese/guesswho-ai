@@ -1,7 +1,6 @@
 """CSC111 Winter 2023 Project: Guess Who Artifical Intelligence
 This module contains the classes and necessary functions to execute
 the frontend of the classic game "Guess Who".
-This file is Copyright (c) 2023 Annie Wang, Mikhail Skazhenyuk, Xinyuan Gu, Ximei Lin.
 """
 from __future__ import annotations
 
@@ -56,11 +55,11 @@ class HumanPlayer(Player):
     def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]) -> None:
         Player.__init__(self, candidates, questions, 'HumanPlayer')
 
-    def make_guesses(self, game: GuessWho) -> str:
+    def make_guesses(self) -> str:
         """Make a guess at the enemy's spy."""
         return GUESS_FRAME_OBJECTS['label']['text']
 
-    def ask_questions(self, game: GuessWho) -> str:
+    def ask_questions(self) -> str:
         """Asks a question based on which question the player selected."""
         return GAME_SETTINGS['question'] + '?'
 
@@ -79,9 +78,9 @@ def make_a_guess() -> None:
     """
     clear_chat()
     p1 = GAME_SETTINGS['players'][0]
-    q1 = p1.make_guesses(GAME_SETTINGS['game'])
+    q1 = p1.make_guesses()
 
-    g2 = GAME_SETTINGS['players'][1].make_guesses(GAME_SETTINGS['game'])
+    g2 = GAME_SETTINGS['players'][1].make_guesses()
     if GAME_SETTINGS['players'][1].spy == q1:
         insert_conversation('You are correct!\n\nComputer made \nthe final guess:\n' + g2 + '\n')
 
@@ -92,7 +91,7 @@ def make_a_guess() -> None:
             insert_conversation('The Computer \nguessed incorrectly!\nYou win!\n')
 
     else:
-        # print(GAME_SETTINGS['players'][1].spy)
+        print(GAME_SETTINGS['players'][1].spy)
         insert_conversation('You are incorrect!\n\nComputer made \nthe final guess:\n' + g2 + '\n')
         if g2 == GAME_SETTINGS['players'][0].spy:
             insert_conversation('The Computer \nguessed correctly!\nYou lose!\n')
@@ -107,12 +106,12 @@ def make_a_guess() -> None:
 def make_a_final_guess() -> None:
     """Makes the current final guess for the HumanPlayer. This is the guess where the computer has already guessed."""
     p1 = GAME_SETTINGS['players'][0]
-    q1 = p1.make_guesses(GAME_SETTINGS['game'])
+    q1 = p1.make_guesses()
 
     if GAME_SETTINGS['players'][1].spy == q1:
         insert_conversation('You are correct!\nIt is a tie!')
     else:
-        insert_conversation('You lost!\n')
+        insert_conversation('You lost!\nMy Spy: ' + GAME_SETTINGS['players'][1].spy)
 
     insert_conversation('''Let's play again!\nClick menu\nto reset''')
     disable_all()
@@ -123,13 +122,13 @@ def make_a_question() -> None:
     """Makes a question for the HumanPlayer"""
     clear_chat()
     p1 = GAME_SETTINGS['players'][0]
-    q1 = p1.ask_questions(GAME_SETTINGS['game'])
+    q1 = p1.ask_questions()
     insert_conversation('You asked if the \ncomputer has:\n'
                         + feature_to_text(GAME_SETTINGS['question'])
                         + '\n')
 
     a1 = GAME_SETTINGS['game'].return_answer(q1, 2)  # Y or N
-
+    print(a1)
     if a1 == 'Y':
         insert_conversation('Yes!\nMy spy has the\nfeature:\n'
                             + feature_to_text(GAME_SETTINGS['question']) + '\n')
@@ -177,7 +176,7 @@ def enable_all() -> None:
 
 def computer_make_a_guess() -> None:
     """Makes the computer make its guess and gives the player an option to make their guess."""
-    g2 = GAME_SETTINGS['players'][1].make_guesses(GAME_SETTINGS['game'])
+    g2 = GAME_SETTINGS['players'][1].make_guesses()
 
     insert_conversation('You are correct!\nComputer made \nthe final guess:\n' + g2 + '\n')
     insert_conversation('The Computer \nguessed correctly!\nIt is your turn\nto tie it up!')
@@ -198,7 +197,7 @@ def computer_make_a_question() -> None:
     if len(p2.candidates) == 1:
         computer_make_a_guess()
     else:
-        q2 = p2.ask_questions(GAME_SETTINGS['game'])
+        q2 = p2.ask_questions()
         a2 = GAME_SETTINGS['game'].return_answer(q2, 1)
         p2.eliminate_candidates(q2, a2)
         insert_conversation('The computer has \nasked if you have:\n' + feature_to_text(q2[0]) + '\n')
@@ -236,6 +235,8 @@ def text_to_player(text: str) -> Player:
         return AI.GreedyPlayer(GAME_SETTINGS['candidates'].copy(), GAME_SETTINGS['questions'].copy())
     elif text == 'RandomPlayer':
         return AI.RandomPlayer(GAME_SETTINGS['candidates'].copy(), GAME_SETTINGS['questions'].copy())
+    elif text == 'CrazyPlayer':
+        return AI.CrazyPlayer(GAME_SETTINGS['candidates'].copy(), GAME_SETTINGS['questions'].copy())
     else:
         return AI.PoorPlayer(GAME_SETTINGS['candidates'].copy(), GAME_SETTINGS['questions'].copy())
 
@@ -1070,7 +1071,7 @@ def summon_main_menu() -> None:
         font='Helvetica 12 italic'
     )
     player_buttons = []
-    players = ['GreedyPlayer', 'RandomPlayer', 'PoorPlayer']
+    players = ['CrazyPlayer', 'GreedyPlayer', 'RandomPlayer', 'PoorPlayer']
 
     for player in players:
         player_buttons.append(Button(
@@ -1094,7 +1095,7 @@ def summon_main_menu() -> None:
 
     player_buttons[0].pack(pady=(50, 5))
 
-    for i in range(1, 3):
+    for i in range(1, 4):
         player_buttons[i].pack(pady=5)
 
     GAME_FEATURES['pb'] = player_buttons

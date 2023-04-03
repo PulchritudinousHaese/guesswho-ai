@@ -11,20 +11,16 @@ from __future__ import annotations
 
 import csv
 import random
-import pandas as pd
-import matplotlib.pyplot as plt
 from dataclasses import dataclass
-
 from typing import Optional
-from features import *
-
-import tkinter as tk
 
 
 ########################################################################
 
 def load_person(person_tuple: tuple[str]) -> Person:
     """Returns a Person from the defined string of characteristics.
+    Preconditions:
+    - len(person_tuple) == 9
     """
     features_so_far = set()
     for p in person_tuple[1:]:
@@ -54,7 +50,6 @@ def load_persons(file_name: str) -> list[Person]:
 
 ########################################################################
 
-# TODO: Finish attributes, initializer, determine functions necessary
 @dataclass
 class Person:
     """The main class to represent each person in the game of GuessWho.
@@ -126,7 +121,7 @@ class GuessWho:
     def whose_turn(self) -> int:
         """ return it's which player's turn to make a guess in this round of game"""
         if len(self.process) == 0:
-            return 1           
+            return 1
         elif len(self.process) % 2 == 0:
             return 2
         else:
@@ -139,7 +134,6 @@ class GuessWho:
 
     def copy_and_record_player_move(self, question: str) -> GuessWho:
         """Return a copy of this game state with the question.
-
         """
         new_game = self._copy()
         new_game.record_player_move(question)
@@ -147,21 +141,18 @@ class GuessWho:
 
     def _copy(self) -> GuessWho:
         """Return a copy of this game state."""
-        new_game = GuessWho([player for player in self.players.values()], self.candidates)
+        new_game = GuessWho(list(player for player in list(self.players.values())), self.candidates)
         new_game.process.extend(self.process)
         return new_game
 
     def record_player_move(self, question: str) -> None:
         """Record the given question by the player.
-
         """
         self.process.append(question)
 
     def get_move_sequence(self) -> list[str]:
         """Return the move sequence made in this game.
-
         The returned list contains all questions that have been asked in the game.
-
         """
         return self.process
 
@@ -169,7 +160,6 @@ class GuessWho:
 def create_candidates(file: str, num_cha: int) -> dict[str, dict[str, str]]:
     """Function to load all questions and answers for all candidates into a dictionary
        as determined in the file. Create the candidates dictionary with num_cha characters.
-
        Precondition:
        - file != ''
     """
@@ -230,14 +220,13 @@ class Player:
         self.questions = questions
         self.name = name
 
-    def select_spy(self):
+    def select_spy(self) -> None:
         """ The player selects the docstring"""
-        self.spy = random.choice([name for name in self.candidates.keys()])
+        self.spy = random.choice(list(name for name in list(self.candidates.keys())))
 
     def make_guesses(self) -> str:
         """ The player makes a guess of the opponent's spy based on the current state of the game. An abstract class
             that would be nimplemented differently based on different players we define.
-
          Preconditions:
              - game._whose_turn() == self.n
         """
@@ -250,7 +239,7 @@ class Player:
         """
         raise NotImplementedError
 
-    def eliminate_candidates(self, generated_question: str, answer: str):
+    def eliminate_candidates(self, generated_question: str, answer: str) -> None:
         """ Eliminating the candidates based on the answers to the question. """
         to_delete = []
         for k, v in self.candidates.items():
@@ -261,25 +250,25 @@ class Player:
         for key in to_delete:
             del self.candidates[key]
 
-    def eliminate_question(self, generated_question: str):
+    def eliminate_question(self, generated_question: str) -> None:
         """Eliminating the questions that has been asked."""
         self.questions.remove(generated_question)
-        
+
+
 if __name__ == '__main__':
+    import doctest
+
+    doctest.testmod(verbose=True)
     # When you are ready to check your work with python_ta, uncomment the following lines.
     # (In PyCharm, select the lines below and press Ctrl/Cmd + / to toggle comments.)
     # You can use "Run file in Python Console" to run PythonTA,
     # and then also test your methods manually in the console.
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'max-nested-blocks': 4,
-    #     'extra-imports': ['random', 'a2_adversarial_wordle', 'a2_game_tree'],
-    #     'allowed-io': ['run_learning_algorithm']
-    # })
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'max-nested-blocks': 4,
-    #     'extra-imports': ['random', 'a2_adversarial_wordle', 'a2_game_tree'],
-    #     'allowed-io': ['run_learning_algorithm']
-    # })
+    import python_ta
+
+    python_ta.check_all(config={
+        'extra-imports': ['random', 'csv', 'pandas', 'matplotlib.pyplot', 'features', 'tkinter'],
+        # the names (strs) of imported modules
+        'allowed-io': ['load_persons', 'create_candidates', 'generate_all_possible_questions'],
+        # the names (strs) of functions that call print/open/input
+        'max-line-length': 120
+    })

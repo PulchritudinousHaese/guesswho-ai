@@ -63,6 +63,10 @@ class HumanPlayer(Player):
         """Asks a question based on which question the player selected."""
         return GAME_SETTINGS['question'] + '?'
 
+    def copy(self) -> Player:
+        """Returns a copy of itself"""
+        return HumanPlayer(self.candidates.copy(), self.questions.copy())
+
 
 ########################################################################################################################
 # MAIN PART TO RUN THE GUI BACKEND #
@@ -1136,13 +1140,14 @@ if __name__ == "__main__":
 
     python_ta.check_all(config={
         'max-line-length': 120,
-        'extra-imports': ['tkinter', 'guess_who', 'features'],
+        'extra-imports': ['tkinter', 'guess_who', 'features', 'artificial_intelligence'],
         'disable': ['forbidden-top-level-code',
                     'wildcard-import',
                     'too-many-branches',
                     'forbidden-global-variables',
                     'unused-argument',
-                    'too-many-arguments'
+                    'too-many-arguments',
+                    'too-many-lines'
                     ],
         'allowed-io': []
     })

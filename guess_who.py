@@ -12,20 +12,20 @@ from __future__ import annotations
 import csv
 import random
 from dataclasses import dataclass
+
 from typing import Optional
 
-
 ########################################################################
-
 def load_person(person_tuple: tuple[str]) -> Person:
     """Returns a Person from the defined string of characteristics.
     Preconditions:
     - len(person_tuple) == 9
     """
+    p = person_tuple
     features_so_far = set()
     for p in person_tuple[1:]:
         features_so_far.add(p)
-    person = Person(person_tuple[0], features_so_far)
+    person = Person(p[0], features_so_far)
     return person
 
 
@@ -49,7 +49,6 @@ def load_persons(file_name: str) -> list[Person]:
 
 
 ########################################################################
-
 @dataclass
 class Person:
     """The main class to represent each person in the game of GuessWho.
@@ -119,21 +118,26 @@ class GuessWho:
                 return self.players[1].name
 
     def whose_turn(self) -> int:
-        """ return it's which player's turn to make a guess in this round of game"""
+        """ return it's which player's turn to make a guess in this round of game
+            Return value 2 means it's the second plyer's turn
+            Return value 1 means it's the first player's turn
+        """
         if len(self.process) == 0:
             return 1
         elif len(self.process) % 2 == 0:
-            return 2
-        else:
             return 1
+        else:
+            return 2
 
     def return_answer(self, question: str, player_num: int) -> str:
-        """ Answer yes or no to the questiont that one player has asked, regarding the spy that player_num has chosen"""
+        """ Answer yes or no to the questiont that one player has asked, regarding the spy that player_num has chosen
+         """
         verify_with = self.players[player_num]
         return self.candidates[verify_with.spy][question]
 
     def copy_and_record_player_move(self, question: str) -> GuessWho:
         """Return a copy of this game state with the question.
+
         """
         new_game = self._copy()
         new_game.record_player_move(question)
@@ -141,7 +145,7 @@ class GuessWho:
 
     def _copy(self) -> GuessWho:
         """Return a copy of this game state."""
-        new_game = GuessWho(list(player for player in list(self.players.values())), self.candidates)
+        new_game = GuessWho([player for player in self.players.values()], self.candidates)
         new_game.process.extend(self.process)
         return new_game
 
@@ -152,7 +156,9 @@ class GuessWho:
 
     def get_move_sequence(self) -> list[str]:
         """Return the move sequence made in this game.
+
         The returned list contains all questions that have been asked in the game.
+
         """
         return self.process
 
@@ -160,6 +166,7 @@ class GuessWho:
 def create_candidates(file: str, num_cha: int) -> dict[str, dict[str, str]]:
     """Function to load all questions and answers for all candidates into a dictionary
        as determined in the file. Create the candidates dictionary with num_cha characters.
+
        Precondition:
        - file != ''
     """
@@ -220,17 +227,19 @@ class Player:
         self.questions = questions
         self.name = name
 
-    def select_spy(self) -> None:
+    def select_spy(self):
         """ The player selects the docstring"""
-        self.spy = random.choice(list(name for name in self.candidates.keys()))
+        self.spy = random.choice([name for name in self.candidates.keys()])
 
     def make_guesses(self) -> str:
         """ The player makes a guess of the opponent's spy based on the current state of the game. An abstract class
             that would be nimplemented differently based on different players we define.
+
          Preconditions:
              - game._whose_turn() == self.n
         """
-        return self.candidates.popitem()[0]
+        for name in self.candidates:
+            return name
 
     def ask_questions(self) -> str:
         """ The player asks question about the characterstics of the spy based on the current state of the game.
@@ -239,38 +248,21 @@ class Player:
         """
         raise NotImplementedError
 
-    def eliminate_candidates(self, generated_question: str, answer: str) -> None:
+    def eliminate_candidates(self, generated_question: str, answer: str):
         """ Eliminating the candidates based on the answers to the question. """
         to_delete = []
         for k, v in self.candidates.items():
             if v[generated_question] != answer:
                 to_delete.append(k)
+        # print(f'{self.name} candidates {len(self.candidates)}')
+        # print(f'to delete{to_delete}')
         for key in to_delete:
             del self.candidates[key]
 
-    def eliminate_question(self, generated_question: str) -> None:
+    def eliminate_question(self, generated_question: str):
         """Eliminating the questions that has been asked."""
         self.questions.remove(generated_question)
 
     def copy(self) -> Player:
         """Return a copy of this player, used in generating gametree for CrazyPlayer"""
         raise NotImplementedError
-
-
-if __name__ == '__main__':
-    import doctest
-
-    doctest.testmod(verbose=True)
-    # When you are ready to check your work with python_ta, uncomment the following lines.
-    # (In PyCharm, select the lines below and press Ctrl/Cmd + / to toggle comments.)
-    # You can use "Run file in Python Console" to run PythonTA,
-    # and then also test your methods manually in the console.
-    import python_ta
-
-    python_ta.check_all(config={
-        'extra-imports': ['random', 'csv', 'pandas', 'matplotlib.pyplot', 'features', 'tkinter'],
-        # the names (strs) of imported modules
-        'allowed-io': ['load_persons', 'create_candidates', 'generate_all_possible_questions'],
-        # the names (strs) of functions that call print/open/input
-        'max-line-length': 120
-    })

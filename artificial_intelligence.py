@@ -161,7 +161,6 @@ def generate_complete_game_tree(root_move: str | game_tree.STARTING_MOVE, game: 
         new_player = CrazyPlayer(self.candidates, self.questions, self.game_tree, self.game)
         return new_player
       
-      
 
 class ExploringPlayer(Player):
     """A player that sometimes plays greedily and sometimes plays randomly."""
@@ -200,13 +199,19 @@ class ExploringPlayer(Player):
 
             else:
                 subtree = self._game_tree.get_subtrees()
-                question = max(subtree, key=lambda s_tree: s_tree.win_probability).move
+                question = max(subtree, key=lambda s_tree: s_tree.win_probability).question
                 self._game_tree = self._game_tree.find_subtree_by_question(question)
                 return question
 
 
 def run_learning_algorithm(file: str, max_guesses: int, probabilities: list[float],
-                         show_stats: bool = True) -> game_tree.GameTree:
+                           show_stats: bool = True) -> game_tree.GameTree:
+    """ Play a sequence of GuessWho games using an ExploringPlayer and RandomPlayer.
+    Preconditions:
+        - file and max_guesses satisfy the preconditions of run_game
+        - all(0.0 <= p <= 1.0 for p in exploration_probabilities)
+        - probabilities != []
+    """
 
     results = {}
     results['num_game'] = []
@@ -225,11 +230,11 @@ def run_learning_algorithm(file: str, max_guesses: int, probabilities: list[floa
         if game == 'ExploringPlyaer':
             results['ExploringPlayer'].append(1)
             results['RandomPlayer'].append(0)
-            tree.insert_move_sequence(game.process, 1.0)
+            tree.insert_question_sequence(game.process, 1.0)
         else:
             results['ExploringPlayer'].append(0)
             results['RandomPlayer'].append(1)
-            tree.insert_move_sequence(game.process)
+            tree.insert_question_sequence(game.process)
         n += 1
         results['num_game'].append(n)
 

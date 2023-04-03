@@ -220,7 +220,7 @@ class Player:
         self.questions = questions
         self.name = name
 
-    def select_spy(self):
+    def select_spy(self) -> None:
         """ The player selects the docstring"""
         self.spy = random.choice([name for name in self.candidates.keys()])
 
@@ -241,7 +241,7 @@ class Player:
         """
         raise NotImplementedError
 
-    def eliminate_candidates(self, generated_question: str, answer: str):
+    def eliminate_candidates(self, generated_question: str, answer: str) -> None:
         """ Eliminating the candidates based on the answers to the question. """
         to_delete = []
         for k, v in self.candidates.items():
@@ -250,7 +250,7 @@ class Player:
         for key in to_delete:
             del self.candidates[key]
 
-    def eliminate_question(self, generated_question: str):
+    def eliminate_question(self, generated_question: str) -> None:
         """Eliminating the questions that has been asked."""
         self.questions.remove(generated_question)
 

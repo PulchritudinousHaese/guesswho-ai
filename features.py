@@ -28,7 +28,7 @@ MOUSTACHE = 'Q'
 BEARD = 'R'
 GLASSES = 'S'
 EARRING = 'T'
-BIGEARS = 'U'
+SMALLEARS = 'U'
 # WAVYHAIR?
 
 SIDEBURNS = 'SIDEBURNS'  # Not a characteristic but used to make bald characters different

@@ -210,7 +210,7 @@ class Player:
     name: str
     questions: list[str]
     candidates: dict[str, dict[str, str]]
-    spy: str
+    spy: Optional[str] = None
 
     def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str], name: str) -> None:
         """ create a new player for the game. n represets if this is the first/second player and characters represent
@@ -220,17 +220,19 @@ class Player:
         self.questions = questions
         self.name = name
 
-    def select_spy(self) -> None:
+    def select_spy(self):
         """ The player selects the docstring"""
-        self.spy = random.choice(list(name for name in list(self.candidates.keys())))
+        self.spy = random.choice([name for name in self.candidates.keys()])
 
     def make_guesses(self) -> str:
         """ The player makes a guess of the opponent's spy based on the current state of the game. An abstract class
             that would be nimplemented differently based on different players we define.
+
          Preconditions:
              - game._whose_turn() == self.n
         """
-        raise NotImplementedError
+        for name in self.candidates:
+            return name
 
     def ask_questions(self) -> str:
         """ The player asks question about the characterstics of the spy based on the current state of the game.
@@ -239,22 +241,24 @@ class Player:
         """
         raise NotImplementedError
 
-    def eliminate_candidates(self, generated_question: str, answer: str) -> None:
+    def eliminate_candidates(self, generated_question: str, answer: str):
         """ Eliminating the candidates based on the answers to the question. """
         to_delete = []
         for k, v in self.candidates.items():
             if v[generated_question] != answer:
                 to_delete.append(k)
-        # print(f'{self.name} candidates {len(self.candidates)}')
-        # print(f'to delete{to_delete}')
         for key in to_delete:
             del self.candidates[key]
 
-    def eliminate_question(self, generated_question: str) -> None:
+    def eliminate_question(self, generated_question: str):
         """Eliminating the questions that has been asked."""
         self.questions.remove(generated_question)
 
+    def copy(self) -> Player:
+        """Return a copy of this player, used in generating gametree for CrazyPlayer"""
+        raise NotImplementedError
 
+        
 if __name__ == '__main__':
     import doctest
 

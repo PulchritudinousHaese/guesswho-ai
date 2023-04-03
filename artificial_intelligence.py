@@ -34,6 +34,8 @@ def generate_complete_game_tree(root_move: str | game_tree.STARTING_MOVE, game: 
     Preconditions:
         - d >= 0
     """
+    
+    
 def generate_complete_game_tree(root_move: str | game_tree.STARTING_MOVE, game: guess_who.GuessWho,
                                 d: int) -> game_tree.GameTree:
     """Generate a complete game tree of depth d for all valid paths the player can take from the current GuessWho Game.
@@ -96,6 +98,87 @@ def generate_complete_game_tree(root_move: str | game_tree.STARTING_MOVE, game: 
         tree.update_tree_probabilities()
         return tree
 
+      
+ class CrazyPlayer(Player):
+    """ This player uses a decision tree that has been created, and picks the question leading to the path
+    with the highest winning probability. The decision tree has depth 7. If self.game_tree is none, CrazyPlayer
+    behaves just like GreedyPlayer.
+    Instance Attributes:
+    - name: name of this type of player in the game.
+    - spy: the spy that the player has chosen.
+    - gametree: the decision tree that the player follows along if the tree is not none.
+    - game: the GuessWho game that this player is in.
+    """
+    game_tree: Optional[game_tree.GameTree]
+    game: Optional[GuessWho]
+
+    def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
+        """ Initialize CrazyPlayer with the provided candidates, questions, and game_tree
+        """
+        Player.__init__(self, candidates, questions, 'CrazyPlayer')
+        self.game_tree = None
+        self.game = None
+
+    def insert_game(self, game):
+        """
+        Update the game instance attribute to self.game
+        """
+        self.game = game
+
+    def insert_tree(self, tree: game_tree):
+        """
+        Update the tree instance attribute to self.tree
+        """
+        self.gametree = tree
+
+    def ask_questions(self) -> str:
+        """ The player asks question about the characterstics of the spy based on the current state of the game. The
+        method mutates questions and candidates by removing the question and candodate that the player
+        has already chosen.
+
+        NOTE:
+            - CrazyPlayer is always the first plyaer in every game, meaning the first to ask question, and alternate
+            with the other player back and forth.
+
+        Precondition:
+            - self.game.whose_turn() == 1
+        """
+        if self.game_tree is not None and len(self.game.process) != 0:
+            opponent_move = self.game.process[-1]
+            sub_tree = self.game_tree.find_subtree_by_move(opponent_move)
+            self.game_tree = sub_tree
+        if self.game_tree is not None and len(self.game_tree.get_subtrees()) != 0:
+            max_sub = None
+            subtrees = self.game_tree.get_subtrees()
+            max_so_far = max([tree1.player1_win_probability for tree1 in subtrees])
+            for tree in subtrees:
+                if tree.player1_win_probability == max_so_far:
+                    max_sub = tree
+            self.game_tree = max_sub
+            return self.game_tree.question
+        else:
+            scores = []
+            for q in self.questions:
+                count_y = 0
+                count_n = 0
+                for v in self.candidates.values():
+                    if v[q] == "Y":
+                        count_y += 1
+                    else:
+                        count_n += 1
+                scores.append(abs(count_y - count_n))
+            min_score = min(scores)
+            min_index = scores.index(min_score)
+            question = self.questions[min_index]
+            self.eliminate_question(question)
+            return question
+
+    def _copy(self) -> CrazyPlayer:
+        """Return a copy of this player, used in generating gametree for CrazyPlayer"""
+        new_player = CrazyPlayer(self.candidates, self.questions, self.game_tree, self.game)
+        return new_player
+      
+      
 class ExploringPlayer(Player):
     """A player that sometimes plays greedily and sometimes plays randomly."""
     _game_tree: Optional[game_tree.GameTree]

@@ -61,7 +61,6 @@ if __name__ == "__main__":
     player1 = PoorPlayer(candidates1.copy(), questions.copy())
     print(run_crazy(100, player1, 8, 'data/questions.csv', True, True))
 
-    # We don't run this game too many times; otherwise the running time is too long.
     # NOTE: You should notive that CrazyPlayer has significantly better performances than PoorPlayer, and the
     # difference is (mostly) bigger than that between GreedyPlayer and PoorPlayer.
     # However, run it for multiple times you would find CrazyPlayer doesn't have the same performances

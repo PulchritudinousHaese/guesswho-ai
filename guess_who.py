@@ -222,17 +222,15 @@ class Player:
 
     def select_spy(self) -> None:
         """ The player selects the docstring"""
-        self.spy = random.choice([name for name in self.candidates.keys()])
+        self.spy = random.choice(list(name for name in self.candidates.keys()))
 
     def make_guesses(self) -> str:
         """ The player makes a guess of the opponent's spy based on the current state of the game. An abstract class
             that would be nimplemented differently based on different players we define.
-
          Preconditions:
              - game._whose_turn() == self.n
         """
-        for name in self.candidates:
-            return name
+        return self.candidates.popitem()[0]
 
     def ask_questions(self) -> str:
         """ The player asks question about the characterstics of the spy based on the current state of the game.
@@ -258,7 +256,7 @@ class Player:
         """Return a copy of this player, used in generating gametree for CrazyPlayer"""
         raise NotImplementedError
 
-        
+
 if __name__ == '__main__':
     import doctest
 

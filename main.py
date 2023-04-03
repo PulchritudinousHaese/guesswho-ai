@@ -28,13 +28,16 @@ if __name__ == "__main__":
     ###########################################################
     #  Sample call between GreedyPlayer and RandomPlayer.
     ###########################################################
+    
     # Define data to initialize two players
     candidates = guess_who.create_candidates('data/questions.csv', 12)  # with 12 characters in each game
     candidates1 = candidates.copy()
     questions = guess_who.generate_all_possible_questions('data/questions.csv')
+    
     ###########################################################
     #  Sample call between GreedyPlayer and PoorPlayer.
     ###########################################################
+    
     # You may change the first parameter to determine how many games to run.
     # player1 = GreedyPlayer(candidates, questions.copy())
     # player2 = PoorPlayer(candidates1, questions.copy())
@@ -44,6 +47,7 @@ if __name__ == "__main__":
     ###########################################################
     #  Sample call between GreedyPlayer and RandomPlayer.
     ###########################################################
+    
     # player1 = GreedyPlayer(candidates, questions.copy())
     # player2 = RandomPlayer(candidates1, questions.copy())
     # print(run_games(100, [player1, player2], 12, 'data/questions.csv', True, True))

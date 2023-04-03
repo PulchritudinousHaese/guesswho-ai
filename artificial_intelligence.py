@@ -4,15 +4,14 @@ necessary functions to backend of the classic game "Guess Who".
 This file is Copyright (c) 2023 Annie Wang, Mikhail Skazhenyuk, Xinyuan Gu, Ximei Lin.
 """
 from __future__ import annotations
-from guess_who import Player, GuessWho
-import guess_who
 import csv
 import random
+from typing import Optional
 import pandas as pd
 import matplotlib.pyplot as plt
+from guess_who import Player, GuessWho
+import guess_who
 import game_tree
-
-from typing import Optional
 
 
 ########################################################################
@@ -94,27 +93,15 @@ class CrazyPlayer(Player):
     - gametree: the decision tree that the player follows along if the tree is not none.
     - game: the GuessWho game that this player is in.
     """
-    game_tree: Optional[game_tree.GameTree]
+    gametree: Optional[game_tree.GameTree]
     game: Optional[GuessWho]
 
-    def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
+    def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]) -> None:
         """ Initialize CrazyPlayer with the provided candidates, questions, and game_tree
         """
         Player.__init__(self, candidates, questions, 'CrazyPlayer')
-        self.game_tree = None
+        self.gametree = None
         self.game = None
-
-    def insert_game(self, game):
-        """
-        Update the game instance attribute to self.game
-        """
-        self.game = game
-
-    def insert_tree(self, tree: game_tree):
-        """
-        Update the tree instance attribute to self.tree
-        """
-        self.gametree = tree
 
     def ask_questions(self) -> str:
         """ The player asks question about the characterstics of the spy based on the current state of the game. The
@@ -128,19 +115,19 @@ class CrazyPlayer(Player):
         Precondition:
             - self.game.whose_turn() == 1
         """
-        if self.game_tree is not None and len(self.game.process) != 0:
+        if self.gametree is not None and len(self.game.process) != 0:
             opponent_move = self.game.process[-1]
-            sub_tree = self.game_tree.find_subtree_by_question(opponent_move)
-            self.game_tree = sub_tree
-        if self.game_tree is not None and len(self.game_tree.get_subtrees()) != 0:
+            sub_tree = self.gametree.find_subtree_by_question(opponent_move)
+            self.gametree = sub_tree
+        if self.gametree is not None and len(self.gametree.get_subtrees()) != 0:
             max_sub = None
-            subtrees = self.game_tree.get_subtrees()
+            subtrees = self.gametree.get_subtrees()
             max_so_far = max([tree1.player1_win_probability for tree1 in subtrees])
             for tree in subtrees:
                 if tree.player1_win_probability == max_so_far:
                     max_sub = tree
-            self.game_tree = max_sub
-            return self.game_tree.question
+            self.gametree = max_sub
+            return self.gametree.question
         else:
             scores = []
             for q in self.questions:
@@ -158,10 +145,22 @@ class CrazyPlayer(Player):
             self.eliminate_question(question)
             return question
 
-    def _copy(self) -> CrazyPlayer:
+    def copy(self) -> CrazyPlayer:
         """Return a copy of this player, used in generating gametree for CrazyPlayer"""
         new_player = CrazyPlayer(self.candidates, self.questions)
         return new_player
+
+    def insert_game(self, game: GuessWho) -> None:
+        """
+        Update the game instance attribute to self.game.
+        """
+        self.game = game
+
+    def insert_tree(self, tree: Optional[game_tree.GameTree]) -> None:
+        """
+        Update the tree instance attribute to self.tree.
+        """
+        self.gametree = tree
 
 
 class GreedyPlayer(Player):
@@ -171,7 +170,7 @@ class GreedyPlayer(Player):
         - spy: the spy that the player has chosen.
     """
 
-    def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
+    def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]) -> None:
         Player.__init__(self, candidates, questions, 'GreedyPlayer')
 
     def ask_questions(self) -> str:
@@ -207,7 +206,7 @@ class RandomPlayer(Player):
     """ A player who randomly asks question without using a strategy.
     """
 
-    def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]):
+    def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str]) -> None:
         Player.__init__(self, candidates, questions, 'RandomPlayer')
 
     def ask_questions(self) -> str:
@@ -260,7 +259,7 @@ class PoorPlayer(Player):
         return new_player
 
 
-#######
+##################################
 # run games
 ##################################
 def plot_winner_statistics(result1: dict[str, list[int]], player1: str, player2: str) -> None:
@@ -316,17 +315,14 @@ def run_game(players: list[Player], candidates: dict[str, dict[str, str]]) -> di
     player2 = game.players[2]
     if player1.name == 'CrazyPlayer':
         player1.game = game
-
     single_result = {'winner': None, 'num_questions': 0}
     p1_question = player1.questions
     p2_question = game.players[2].questions
     while len(player1.candidates) != 1 and len(player2.candidates) != 1 and p1_question != [] and p2_question != []:
         question1 = player1.ask_questions()
-        print(f'question1: {question1}')
         answer1 = game.return_answer(question1, 2)
         player1.eliminate_candidates(question1, answer1)
         question2 = player2.ask_questions()
-        print(f'question1: {question2}')
         answer2 = game.return_answer(question2, 1)
         player2.eliminate_candidates(question2, answer2)
         single_result['num_questions'] += 1
@@ -352,8 +348,8 @@ def run_games(num: int, players: list[Player], num_cha: int, file: csv, plot: bo
     default1 = default.copy()
     pl1 = players[0]
     pl2 = players[1]
-    results = {'num_games': [n for n in range(1, num + 1)], pl1.name: default, pl2.name: default1}
-    num_q = {'num_games': [n for n in range(1, num + 1)], 'num_questions': []}
+    results = {'num_games': list(range(1, num + 1)), pl1.name: default, pl2.name: default1}
+    num_q = {'num_games': list(range(1, num + 1)), 'num_questions': []}
     game_sta = {players[0].name: 0, players[1].name: 0}
     for i in range(0, num):
         can = guess_who.create_candidates(file, num_cha)
@@ -378,6 +374,8 @@ def run_games(num: int, players: list[Player], num_cha: int, file: csv, plot: bo
         wins_1 = game_sta[pl1.name]
         wins_2 = game_sta[pl2.name]
         return f'[winning_probability:{pl1.name}: {(wins_1 / num) * 100}%, {pl2.name}: {(wins_2 / num) * 100}%]'
+    else:
+        return None
 
 
 def run_crazy(num: int, pla: Player, n: int, f: csv, plot: bool, p: bool = False) -> Optional[str]:
@@ -397,11 +395,10 @@ def run_crazy(num: int, pla: Player, n: int, f: csv, plot: bool, p: bool = False
     """
     default = [0] * num
     default1 = default.copy()
-    results = {'num_games': [n for n in range(1, num + 1)], 'CrazyPlayer': default, pla.name: default1}
-    num_q = {'num_games': [n for n in range(1, num + 1)], 'num_questions': []}
+    results = {'num_games': list(range(1, num + 1)), 'CrazyPlayer': default, pla.name: default1}
+    num_q = {'num_games': list(range(1, num + 1)), 'num_questions': []}
     game_sta = {'CrazyPlayer': 0, pla.name: 0}
     for i in range(0, num):
-        print(f'name: {i}')
         can = guess_who.create_candidates(f, n)
         question = guess_who.generate_all_possible_questions(f)
         pla.candidates = can.copy()
@@ -409,13 +406,7 @@ def run_crazy(num: int, pla: Player, n: int, f: csv, plot: bool, p: bool = False
         pla.select_spy()
         crazy_player = CrazyPlayer(can.copy(), question)
         crazy_player.select_spy()
-        t_player1 = RandomPlayer(can.copy(), question.copy())
-        t_player2 = RandomPlayer(can.copy(), question.copy())
-        t_player1.spy = crazy_player.spy
-        t_player2.spy = pla.spy
-        t_player2.name = 'RandomPlayer1'
-        t_game = guess_who.GuessWho([t_player1, t_player2], can.copy())
-        tree = generate_complete_game_tree(game_tree.STARTING_MOVE, t_game, 6)
+        tree = generate_tree_each_game(can.copy(), question.copy(), [crazy_player, pla])
         # Generate a decision tree by playing games between two RandomPlayer.
         crazy_player.insert_tree(tree)
         crazy_player.select_spy()
@@ -433,34 +424,31 @@ def run_crazy(num: int, pla: Player, n: int, f: csv, plot: bool, p: bool = False
         wins_1 = game_sta['CrazyPlayer']
         wins_2 = game_sta[pla.name]
         return f'[winning_probability: CrazyPlayer: {(wins_1 / num) * 100}%, {pla.name}: {(wins_2 / num) * 100}%]'
+    else:
+        return None
 
 
-if __name__ == '__main__':
-    # When you are ready to check your work with python_ta, uncomment the following lines.
-    # (In PyCharm, select the lines below and press Ctrl/Cmd + / to toggle comments.)
-    # You can use "Run file in Python Console" to run PythonTA,
-    # and then also test your methods manually in the console.
-    import python_ta
-    python_ta.check_all(config={
-        'max-line-length': 120,
-        'max-nested-blocks': 4,
-        'extra-imports': ['random', 'a2_adversarial_wordle', 'a2_game_tree'],
-        'allowed-io': ['run_learning_algorithm']
-    })
+def generate_tree_each_game(candidates: dict, questions: list[str], players: list[Player]) -> game_tree.GameTree:
+    """
+    Generate game tree based on different GuessWho games.
+    Preconditions:
+        - players[0].name == 'CrazyPlayer'
+    """
+    t_player1 = RandomPlayer(candidates.copy(), questions.copy())
+    t_player2 = RandomPlayer(candidates.copy(), questions.copy())
+    t_player1.spy = players[0].spy
+    t_player2.spy = players[1].spy
+    t_player2.name = 'RandomPlayer1'
+    t_game = guess_who.GuessWho([t_player1, t_player2], candidates.copy())
+    tree = generate_complete_game_tree(game_tree.STARTING_MOVE, t_game, 6)
+    return tree
 
 
-    # candidates = guess_who.create_candidates('data/questions.csv', 8)
-    # #candidates2 = candidates.copy()
-    # questions = guess_who.generate_all_possible_questions('data/questions.csv')
-    # player1 = PoorPlayer(candidates, questions)
-    # #player2 = RandomPlayer(candidates.copy(), questions.copy())
-    # print(run_crazy(15, player1, 8, 'data/questions.csv', True, True))
-    # # player2.select_spy()
-    # # player2.name = 'RandomPlayer1'
-    # #game = guess_who.GuessWho([player1, player2], candidates.copy())
-    # #  print(run_game([player1, player2], candidates2))
-    # #
-    # # print(run_games(100, [player1, player2], 12, 'data/questions.csv', True, True))
-    # # tree = generate_complete_game_tree(game_tree.STARTING_MOVE, game, 7)
-    # # print(tree)
-    # # print(len(tree.get_subtrees()))
+# if __name__ == '__main__':
+#     # import python_ta
+#     # python_ta.check_all(config={
+#     #     'extra-imports': ['__future__', 'guess_who', 'matplotlib.pyplot', 'pandas', 'csv', 'random',
+#     #                       'matplotlib', 'game_tree', 'typing'],
+#     #     'allowed-io': ['open', 'f-strings', 'print'],  # the names (strs) of functions that call print/open/input
+#     #     'max-line-length': 120
+#     # })

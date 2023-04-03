@@ -1,153 +1,275 @@
 """CSC111 Winter 2023 Project: Guess Who Artifical Intelligence
-This module contains the GameTree class and all necessary methods to
-add respective player moves and change probabilities.
+This module contains the classes and necessary functions to execute
+the backend of the classic game "Guess Who".
+Some features:
+https://chalkdustmagazine.com/blog/cracking-guess-board-game/
+All characters:
+https://www.joe.co.uk/life/ranking-guess-who-least-most-horny-193991
 This file is Copyright (c) 2023 Annie Wang, Mikhail Skazhenyuk, Xinyuan Gu, Ximei Lin.
 """
 from __future__ import annotations
 
+import csv
+import random
+import pandas as pd
+import matplotlib.pyplot as plt
+from dataclasses import dataclass
+
 from typing import Optional
+from features import *
 
-STARTING_MOVE = '*'
+import tkinter as tk
 
 
-class GameTree:
-    """A tree to compile different move sequences of the game Guess Who.
+########################################################################
 
-    THIS DOES NOT STORE ALTERNATING MOVES, RATHER IT STORES INDIVIDUAL PLAYER MOVE SEQUENCES.
-
-    Each node in the tree stores a Guess Who question/guess.
-
-    Instance Attributes:
-        - move: '*' if it is the start of the game, or a question/guess
-        - win_probability: the probability the player will win if they follow this path.
-
-    Representation Invariants:
-        - self.move == STARTING_MOVE or self.move is a valid Guess Who question/guess
-        - all(key == self._subtrees[key].move for key in self._subtrees)
-        - STARTING_MOVE not in self._subtrees  # since it can only appear at the very top of a game tree
+def load_person(person_tuple: tuple[str]) -> Person:
+    """Returns a Person from the defined string of characteristics.
+    Preconditions:
+    - len(person_tuple) == 9
     """
-    move: str
-    win_probability: Optional[float] = 0.0
+    p = person_tuple
+    features_so_far = set()
+    for p in person_tuple[1:]:
+        features_so_far.add(p)
+    person = Person(p[0], features_so_far)
+    return person
 
-    # Private Instance Attributes:
-    #  - _subtrees:
-    #      Following step along the path (question/guess)
-    _subtrees: dict[str, GameTree]
 
-    def __init__(self, move: str = STARTING_MOVE,
-                 win_probability: Optional[float] = 0.0) -> None:
-        """Initialize a new game tree.
+def load_persons(file_name: str) -> list[Person]:
+    """Function to load all features into a list of Person classes
+    as determined in the file file_name.
+    Precondition:
+    - file_name != ''
+    """
+    persons_so_far = []
 
-        >>> game = GameTree()
-        >>> game.move == STARTING_MOVE
-        True
+    with open(file_name) as csv_file:
+        reader = csv.reader(csv_file)
+        next(reader)
+        for row in reader:
+            row = tuple(row)
+            person = load_person(row)
+            persons_so_far.append(person)
+
+    return persons_so_far
+
+
+########################################################################
+@dataclass
+class Person:
+    """The main class to represent each person in the game of GuessWho.
+  Instance Attributes:
+  - name: The person's name (for the final guess)
+  - features: A set of all the person's features
+  - up: Boolean whether the person has been guessed/eliminated or not.
+  Representation Invariants:
+  - self.features != set()
+  """
+    name: str
+    features: set[str]
+    up: bool
+
+    def __init__(self, name: str, features: set[str], up: bool = True) -> None:
+        """Initialize Person with given Instance Attributes. """
+
+        self.name = name
+        self.features = features
+        self.up = up
+
+
+class GuessWho:
+    """The main class to run the game of GuessWho and represent its game_state.
+    Instance Attributes:
+    - guesses: A list representing the moves made by both players in order.
+    - spies: A list representing the spies of each player (index 0 for player one, index 1 for player two)
+    - players: A list of the players in the game
+    Representation Invariants:
+    - len(spies) == 2
+    - spy is a valid person from the given file
+     """
+    players: dict[int, Player]
+    process: list[str]
+    candidates: dict[str, dict[str, str]]
+
+    def __init__(self, players: list[Player], candidates: dict[str, dict[str, str]]) -> None:
+        """ Initialize a GuessWho game with the two players"""
+        self.candidates = candidates
+        self.players = {1: players[0], 2: players[1]}
+        self.process = []
+
+    def get_winner(self) -> Optional[str]:
+        """ return if there is a winner in the game and which player is the winner, with the guess1 by player1
+        and guess2 by player2. Guess1 is the guess made by player1 and guess2 is the guess by player2.
+        One of the player wins if :
+            - The player successfully guesses the spy of the opponent.
+            - The opponent has run out of the questions first。
+        There is a tie under two circumstances:
+            - Both guessers have guessed the spy of the opponent.
+            - Both players have run out of questions to ask.
         """
-        self.move = move
-        self._subtrees = {}
-        self.win_probability = win_probability
+        if not self.players[1].questions and not self.players[2].questions:
+            return 'tie'
+        elif not self.players[1].questions:
+            return self.players[2].name
+        elif not self.players[2].questions:
+            return self.players[1].name
+        elif len(self.players[1].candidates) == 1 or len(self.players[2].candidates) == 1:
+            guess1 = self.players[1].make_guesses()
+            guess2 = self.players[2].make_guesses()
+            if (guess1 == self.players[1].spy) and (guess2 == self.players[2].spy):
+                return 'tie'
+            elif guess2 == self.players[1].spy:
+                return self.players[2].name
+            elif guess1 == self.players[2].spy:
+                return self.players[1].name
 
-    def get_subtrees(self) -> list[GameTree]:
-        """Return the game trees (out of the _subtrees dict)."""
-        return list(self._subtrees.values())
-
-    def find_subtree_by_move(self, move: str) -> Optional[GameTree]:
-        """Returns the GameTree corresponding the question (move) made.
-        Returns None if no such subtree exists.
+    def whose_turn(self) -> int:
+        """ return it's which player's turn to make a guess in this round of game
+            Return value 2 means it's the second plyer's turn
+            Return value 1 means it's the first player's turn
         """
-        if move in self._subtrees:
-            return self._subtrees[move]
+        if len(self.process) == 0:
+            return 1
+        elif len(self.process) % 2 == 0:
+            return 1
         else:
-            return None
+            return 2
 
-    def __str__(self) -> str:
-        """Return a string version of this tree.
+    def return_answer(self, question: str, player_num: int) -> str:
+        """ Answer yes or no to the questiont that one player has asked, regarding the spy that player_num has chosen
+         """
+        verify_with = self.players[player_num]
+        return self.candidates[verify_with.spy][question]
+
+    def copy_and_record_player_move(self, question: str) -> GuessWho:
+        """Return a copy of this game state with the question.
+
         """
-        return self._printable(0)
+        new_game = self._copy()
+        new_game.record_player_move(question)
+        return new_game
 
-    def _printable(self, depth: int) -> str:
-        """Return an indented string representation of this tree.
+    def _copy(self) -> GuessWho:
+        """Return a copy of this game state."""
+        new_game = GuessWho([player for player in self.players.values()], self.candidates)
+        new_game.process.extend(self.process)
+        return new_game
 
-        Preconditions:
-            - depth >= 0
+    def record_player_move(self, question: str) -> None:
+        """Record the given question by the player.
         """
-        move_desc = f'{self.move}\n'
-        str_so_far = '  ' * depth + move_desc
-        for subtree in self._subtrees.values():
-            str_so_far += subtree._printable(depth + 1)
-        return str_so_far
+        self.process.append(question)
 
-    def add_subtree(self, subtree: GameTree) -> None:
-        """Add a subtree to this game tree.
-        Update probability following this addition.
+    def get_move_sequence(self) -> list[str]:
+        """Return the move sequence made in this game.
+
+        The returned list contains all questions that have been asked in the game.
+
         """
-        self._subtrees[subtree.move] = subtree
-        self._update_win_probability()
+        return self.process
 
-    def insert_move_sequence(self, moves: list[str], probability: Optional[float] = 0.0) -> None:
-        """Insert the given sequence of moves (questions/guesses) into this tree.
+
+def create_candidates(file: str, num_cha: int) -> dict[str, dict[str, str]]:
+    """Function to load all questions and answers for all candidates into a dictionary
+       as determined in the file. Create the candidates dictionary with num_cha characters.
+
+       Precondition:
+       - file != ''
+    """
+    candidate_so_far = {}
+    limited_candidates = {}
+    b = 0
+
+    with open(file) as csv_file:
+        reader = csv.reader(csv_file)
+        next(reader)
+
+        for row in reader:
+            d = {}
+            for i in range(0, (len(row) - 1) // 2):
+                d[row[2 * i + 1]] = row[2 * i + 2]
+            candidate_so_far[row[0]] = d
+
+        while b != num_cha:
+            added_pair = random.choice(list(candidate_so_far.items()))
+            if added_pair[0] not in limited_candidates:
+                limited_candidates[added_pair[0]] = added_pair[1]
+                b += 1
+        return limited_candidates
+
+
+def generate_all_possible_questions(file: str) -> list[str]:
+    """ A function to generate all questions from the file. """
+    all_questions = []
+
+    with open(file) as csv_file:
+        row = csv_file.readlines()[0]
+        for i in range(1, len(row) // 2):
+            all_questions.append(row[2 * i + 1] + '?')
+
+    return all_questions[1:]
+
+
+class Player:
+    """ One of the player in the game
+    Instance Attributes:
+    - the name of the player.
+    - questions : A list representing the questions the player has asked.
+    - n : an integer determining if the player is the player 0 or player 1 in the game.
+    - spy : The spy this player has chosen.
+    Representation Invariants:
+        - spy is a valid person from the given file
+    """
+    name: str
+    questions: list[str]
+    candidates: dict[str, dict[str, str]]
+    spy: Optional[str] = None
+
+    def __init__(self, candidates: dict[str, dict[str, str]], questions: list[str], name: str) -> None:
+        """ create a new player for the game. n represets if this is the first/second player and characters represent
+        the list of characters that this player can potentially choose to be the spy.
+         """
+        self.candidates = candidates
+        self.questions = questions
+        self.name = name
+
+    def select_spy(self):
+        """ The player selects the docstring"""
+        self.spy = random.choice([name for name in self.candidates.keys()])
+
+    def make_guesses(self) -> str:
+        """ The player makes a guess of the opponent's spy based on the current state of the game. An abstract class
+            that would be nimplemented differently based on different players we define.
+
+         Preconditions:
+             - game._whose_turn() == self.n
         """
-        moves_copy = moves.copy()
-        if self.sequence_in_tree(moves) or not moves:
-            return
-        elif moves[0] in self._subtrees:
-            move = moves_copy.pop(0)
-            tree = self.find_subtree_by_move(move)
-            tree.insert_move_sequence(moves_copy, probability)
-        else:
-            self.next_moves(moves_copy, probability)
+        for name in self.candidates:
+            return name
 
-        self._update_win_probability()
-
-    def sequence_in_tree(self, moves: list[str]) -> bool:
-        """Return wheter the move sequence is already in the tree."""
-        moves_copy = moves.copy()
-        if not moves:
-            return True
-        elif moves[0] not in self._subtrees:
-            return False
-        else:
-            move = moves_copy.pop(0)
-            subtree = self.find_subtree_by_move(move)
-            return subtree.sequence_in_tree(moves_copy)
-
-    def next_moves(self, moves: list[str], probability: Optional[float] = 0.0) -> None:
-        """Helper Function.
-        Recursively adds next moves to the GameTree assuming this version of events never occured before.
+    def ask_questions(self) -> str:
+        """ The player asks question about the characterstics of the spy based on the current state of the game.
+         Preconditions:
+            - game._whose_turn() == self.n
         """
-        if len(moves) == 1:  # Last move in sequence
-            new_leaf = GameTree(moves[0])
-            new_leaf.win_probability = probability
-            self.add_subtree(new_leaf)
-        else:
-            moves_copy = moves.copy()
-            move = moves_copy.pop(0)
-            game_tree = GameTree(move)
-            game_tree.next_moves(moves_copy, probability)
-            self.add_subtree(game_tree)
-        self._update_win_probability()
+        raise NotImplementedError
 
-    def _update_win_probability(self) -> None:
-        """Recalculate the guesser win probability of this tree.
+    def eliminate_candidates(self, generated_question: str, answer: str):
+        """ Eliminating the candidates based on the answers to the question. """
+        to_delete = []
+        for k, v in self.candidates.items():
+            if v[generated_question] != answer:
+                to_delete.append(k)
+        # print(f'{self.name} candidates {len(self.candidates)}')
+        # print(f'to delete{to_delete}')
+        for key in to_delete:
+            del self.candidates[key]
 
-        Probability is updated based on these metrics:
-        - If it is a leaf: Do not touch
-        - If it has subtrees: Take the average of the subtree probabiltiies
-        """
-        if not self.get_subtrees():
-            return
-        elif self.get_subtrees():
-            probability_sum = sum(tree.win_probability for tree in self.get_subtrees())
-            self.win_probability = probability_sum / len(self.get_subtrees())
+    def eliminate_question(self, generated_question: str):
+        """Eliminating the questions that has been asked."""
+        self.questions.remove(generated_question)
 
-    def update_tree_probabilities(self) -> None:
-        """Updates the entire tree's probabilities recursively."""
-        if self._subtrees:
-            for subtree in self.get_subtrees():
-                subtree.update_tree_probabilities()
-            self._update_win_probability()
-
-
-if __name__ == '__main__':
-    import doctest
-
-    doctest.testmod(verbose=True)
+    def copy(self) -> Player:
+        """Return a copy of this player, used in generating gametree for CrazyPlayer"""
+        raise NotImplementedError

@@ -287,7 +287,7 @@ def run_window() -> None:
 
 
 def new_game() -> None:
-    """Starts a new game of GuessWho. Frehs start and then run the main window of the game."""
+    """Starts a new game of GuessWho. Fresh start and then run the main window of the game."""
     GAME_SETTINGS['candidates'] = create_candidates('data/questions.csv', 24)  # 24 people NECESSARY.
     candidates1 = GAME_SETTINGS['candidates'].copy()
     GAME_SETTINGS['questions'] = generate_all_possible_questions('data/questions.csv')

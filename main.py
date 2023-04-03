@@ -64,7 +64,7 @@ if __name__ == '__main__':
 #  Sample call between PoorPlayer and CrazyPlayer.
 ########################
     # NOTE: we only use a small number of characters since it takes long to generate a complete GameTree.
-#    candidates1 = guess_who.create_candidates('data/questions.csv', 8)
+#    candidates2 = guess_who.create_candidates('data/questions.csv', 8)
 #    player1 = PoorPlayer(candidates1.copy(), questions.copy())
 #    print(run_crazy(100, player1, 8, 'data/questions.csv', True, True))
 

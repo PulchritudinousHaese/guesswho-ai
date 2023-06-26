@@ -1,1 +1,1 @@
-# csc111-project
+# guesswho-ai
